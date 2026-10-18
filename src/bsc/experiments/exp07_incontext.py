@@ -148,7 +148,7 @@ def run(
             name,
             seed=seed,
             model_overrides={"d_model": 128, "n_layers": 4},
-            train_overrides={"steps": 8000, "ctx": 192},
+            train_overrides={"steps": 4000, "ctx": 192, "batch_size": 128},
         )
         model, eval_set, process = out["model"], out["eval_set"], out["process"]
         burn_in = out["train_cfg"].burn_in

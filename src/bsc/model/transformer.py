@@ -101,20 +101,38 @@ class Attention(nn.Module):
         mask = torch.triu(torch.ones(cfg.n_ctx, cfg.n_ctx, dtype=torch.bool), diagonal=1)
         self.register_buffer("causal_mask", mask, persistent=False)
 
+    def _project(self, x: torch.Tensor, W: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+        """(batch, pos, d_model) -> (batch, pos, head, d_head) as one matmul."""
+        b_, p_, _ = x.shape
+        flat = W.permute(1, 0, 2).reshape(self.cfg.d_model, -1)
+        return (x @ flat).view(b_, p_, self.cfg.n_heads, self.cfg.d_head) + b
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (batch, pos, d_model)
         n = x.shape[1]
-        q = self.hook_q(torch.einsum("bpd,hdk->bphk", x, self.W_Q) + self.b_Q)
-        k = self.hook_k(torch.einsum("bpd,hdk->bphk", x, self.W_K) + self.b_K)
-        v = self.hook_v(torch.einsum("bpd,hdk->bphk", x, self.W_V) + self.b_V)
+        q = self.hook_q(self._project(x, self.W_Q, self.b_Q))
+        k = self.hook_k(self._project(x, self.W_K, self.b_K))
+        v = self.hook_v(self._project(x, self.W_V, self.b_V))
 
-        scores = torch.einsum("bqhk,bshk->bhqs", q, k) / math.sqrt(self.cfg.d_head)
-        scores = self.hook_attn_scores(scores)
-        scores = scores.masked_fill(self.causal_mask[:n, :n], torch.finfo(scores.dtype).min)
-        pattern = self.hook_pattern(scores.softmax(dim=-1))
+        # Materialising the (batch, head, pos, pos) pattern is by far the most
+        # expensive thing this model does, and it is only needed when something is
+        # actually reading or writing it. When nothing is hooked there, defer to
+        # the fused kernel; the two paths are checked against each other in tests.
+        if self.hook_attn_scores._fns or self.hook_pattern._fns:
+            scores = torch.einsum("bqhk,bshk->bhqs", q, k) / math.sqrt(self.cfg.d_head)
+            scores = self.hook_attn_scores(scores)
+            scores = scores.masked_fill(self.causal_mask[:n, :n], torch.finfo(scores.dtype).min)
+            pattern = self.hook_pattern(scores.softmax(dim=-1))
+            z = torch.einsum("bhqs,bshk->bqhk", pattern, v)
+        else:
+            z = F.scaled_dot_product_attention(
+                q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2), is_causal=True
+            ).transpose(1, 2)
 
-        z = self.hook_z(torch.einsum("bhqs,bshk->bqhk", pattern, v))
-        return torch.einsum("bqhk,hkd->bqd", z, self.W_O) + self.b_O
+        z = self.hook_z(z)
+        b_, p_, _, _ = z.shape
+        flat = self.W_O.reshape(-1, self.cfg.d_model)
+        return z.reshape(b_, p_, -1) @ flat + self.b_O
 
     def OV(self, head: int) -> torch.Tensor:
         """The head's OV circuit as a d_model x d_model matrix: W_V[h] @ W_O[h]."""

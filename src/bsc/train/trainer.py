@@ -168,6 +168,10 @@ def train_model(
     history: list[dict] = []
     t0 = time.time()
     model.train()
+    # TF32 for the training loop only. Analysis runs at full precision, because the
+    # weight-level comparisons are quoted to four and five decimal places.
+    prev_tf32 = torch.backends.cuda.matmul.allow_tf32
+    torch.backends.cuda.matmul.allow_tf32 = True
     for step in range(cfg.steps):
         for group in opt.param_groups:
             group["lr"] = _lr_at(step, cfg)
@@ -192,6 +196,7 @@ def train_model(
                     flush=True,
                 )
 
+    torch.backends.cuda.matmul.allow_tf32 = prev_tf32
     final = evaluate(model, eval_set, head, cfg.burn_in, n_mixture, per_position=True)
     return {
         "model": model,

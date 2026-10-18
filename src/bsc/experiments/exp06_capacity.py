@@ -37,7 +37,7 @@ from ..utils import RESULTS_DIR, environment_stamp, save_json
 from .common import best_probe, figure_path, train_cached
 
 CAPACITY_PROCESSES = ("mess3_hard", "sns", "random_non")
-WIDTHS = (4, 6, 8, 12, 16, 24, 32, 64, 128)
+WIDTHS = (4, 8, 12, 16, 24, 32, 64)
 
 
 @torch.no_grad()

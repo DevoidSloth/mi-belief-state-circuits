@@ -247,24 +247,46 @@ def _r2_from_features(F_: np.ndarray, Y: np.ndarray, ridge: float = 1e-8) -> flo
     return float(1.0 - (resid**2).sum() / max((Yc**2).sum(), 1e-12))
 
 
-def greedy_feature_selection(F_: np.ndarray, Y: np.ndarray, k: int) -> tuple[list[int], list[float]]:
-    """Greedily pick the k features that best explain Y. Returns (indices, R^2 after each)."""
+def greedy_feature_selection(F_: np.ndarray, Y: np.ndarray, k: int, ridge: float = 1e-8):
+    """Greedily pick the k features that best explain Y. Returns (indices, R^2 after each).
+
+    Scored through precomputed Gram matrices, so each candidate costs O(k^3) rather
+    than O(N k^2). With a few hundred candidates and N in the tens of thousands the
+    naive form dominates the whole experiment's runtime.
+    """
+    F_ = np.asarray(F_, dtype=np.float64)
+    Y = np.asarray(Y, dtype=np.float64)
+    Fc = F_ - F_.mean(0)
+    Yc = Y - Y.mean(0)
+    total = (Yc**2).sum()
+    if total <= 1e-12 or Fc.shape[1] == 0:
+        return [], []
+
+    G = Fc.T @ Fc                      # (m, m)
+    C = Fc.T @ Yc                      # (m, d)
+    active = np.flatnonzero(np.diag(G) > 1e-12)
+
     chosen: list[int] = []
     curve: list[float] = []
-    active = np.var(F_, axis=0) > 1e-12
-    candidates = np.flatnonzero(active)
     for _ in range(k):
         best_j, best_r2 = None, -np.inf
-        for j in candidates:
+        for j in active:
             if j in chosen:
                 continue
-            r2 = _r2_from_features(F_[:, [*chosen, j]], Y)
+            idx = [*chosen, int(j)]
+            sub = G[np.ix_(idx, idx)] + ridge * np.eye(len(idx))
+            try:
+                beta = np.linalg.solve(sub, C[idx])
+            except np.linalg.LinAlgError:
+                continue
+            # explained sum of squares = trace(beta^T G_sub beta) with beta = G^-1 C
+            r2 = float((C[idx] * beta).sum() / total)
             if r2 > best_r2:
                 best_j, best_r2 = int(j), r2
         if best_j is None:
             break
         chosen.append(best_j)
-        curve.append(best_r2)
+        curve.append(min(best_r2, 1.0))
     return chosen, curve
 
 
@@ -293,9 +315,9 @@ def belief_capture(
     belief: torch.Tensor,
     ks=(1, 2, 4, 8, 16),
     burn_in: int = 16,
-    max_points: int = 20000,
+    max_points: int = 15000,
     seed: int = 0,
-    max_candidates: int = 512,
+    max_candidates: int = 384,
 ) -> dict:
     """Belief variance explained by k SAE features versus k linear dimensions."""
     A = acts[:, burn_in:].reshape(-1, acts.shape[-1]).float()
@@ -316,7 +338,12 @@ def belief_capture(
     # so the cost is bounded without materially weakening the SAE's chances
     live = np.flatnonzero(Fsae.var(0) > 1e-12)
     if len(live) > max_candidates:
-        singles = np.array([_r2_from_features(Fsae[:, [j]], Y) for j in live])
+        # rank by single-feature R^2, computed in one vectorised pass
+        Fc = Fsae[:, live] - Fsae[:, live].mean(0)
+        Yc = Y - Y.mean(0)
+        num = (Fc.T @ Yc) ** 2
+        den = (Fc**2).sum(0)[:, None] * (Yc**2).sum()
+        singles = np.where(den > 1e-24, num / np.maximum(den, 1e-24), 0.0).sum(1)
         live = live[np.argsort(-singles)[:max_candidates]]
     Fsub = Fsae[:, live]
 

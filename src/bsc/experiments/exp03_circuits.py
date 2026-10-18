@@ -33,7 +33,7 @@ from ..analysis.scrubbing import ScrubHypothesis, Scrubber
 from ..utils import RESULTS_DIR, environment_stamp, save_json
 from .common import train_cached
 
-CIRCUIT_PROCESSES = ("even", "rrxor", "mess3_hard", "sns", "drifting_coin", "garch", "regimevol")
+CIRCUIT_PROCESSES = ("even", "rrxor", "mess3_hard", "sns", "regimevol")
 
 
 def _component_from_label(label: str) -> Component:

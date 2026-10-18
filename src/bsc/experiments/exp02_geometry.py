@@ -48,7 +48,7 @@ FRACTAL_PROCESSES = ("mess3", "mess3_hard", "sns", "random_non")
 def run(
     processes: tuple[str, ...] = GEOMETRY_PROCESSES,
     seed: int = 0,
-    n_pairs: int = 2048,
+    n_pairs: int = 1024,
     make_figures: bool = True,
     verbose: bool = True,
 ) -> dict:

@@ -45,7 +45,17 @@ MODEL_OVERRIDES: dict[str, dict] = {
 }
 
 DEFAULT_MODEL = {"d_model": 64, "n_layers": 2, "n_heads": 4, "norm": "layer"}
-DEFAULT_TRAIN = {"ctx": 128, "steps": 6000, "batch_size": 256, "lr": 2e-3, "burn_in": 16}
+# Sized against a thermally-throttled laptop 4080 (~1.3 of 3.1 GHz under sustained
+# load). Earlier runs reach the same optimality gaps at a quarter of this compute,
+# so the suite is bounded by wall-clock rather than by convergence.
+DEFAULT_TRAIN = {
+    "ctx": 96,
+    "steps": 3000,
+    "batch_size": 192,
+    "lr": 2e-3,
+    "burn_in": 16,
+    "eval_every": 1500,
+}
 
 
 def recipe(
