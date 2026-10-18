@@ -1,0 +1,100 @@
+# Project brief — kept local, not published
+WHAT_TO_BUILD.MD
+WHAT_TO_BUILD.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+build/
+dist/
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.python-version
+
+# Tooling / caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.hypothesis/
+.coverage
+htmlcov/
+.tox/
+
+# C++ / Rust / native
+target/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+*.o
+*.a
+*.dylib
+*.dll
+compile_commands.json
+
+# Data & artifacts
+data/
+datasets/
+raw/
+interim/
+processed/
+*.parquet
+*.arrow
+*.feather
+*.h5
+*.hdf5
+*.csv
+*.csv.gz
+*.npy
+*.npz
+*.pkl
+*.db
+*.duckdb
+*.sqlite3
+
+# Model / experiment output
+runs/
+outputs/
+artifacts/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+mlruns/
+wandb/
+lightning_logs/
+tensorboard/
+
+# Figures (regenerate them) — but keep benchmark reports
+figures/
+*.pdf
+*.png
+*.svg
+!benchmarks/**
+
+# Secrets / local config
+.env
+.env.*
+!.env.example
+secrets.yaml
+*.key
+rpc_endpoints.toml
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+results/
+!results/.gitkeep
+checkpoints/
+*.pt
