@@ -53,16 +53,23 @@ def make_contrast_pairs(
     seed: int = 0,
     min_distance: float = 0.05,
 ) -> ContrastPairs:
-    """Pair sequences that share their last ``suffix_len`` observations but differ in belief.
+    """Pair sequences whose last ``suffix_len`` *context* observations match but whose beliefs differ.
 
-    For discrete processes the suffix is matched exactly.  For continuous ones an
-    exact match has probability zero, so pairs are matched on the nearest suffix
+    The matched window is ``obs[readout - suffix_len : readout]`` -- strictly
+    before the readout position.  Including ``obs[readout]`` would match on the
+    token being predicted, which conditions every pair on its own outcome: for a
+    process whose belief pins the next symbol, one member of each pair is then
+    always the confident-and-correct one, and patching between them produces
+    systematically negative effects that say nothing about the component.
+
+    For discrete processes the window is matched exactly.  For continuous ones an
+    exact match has probability zero, so pairs are matched on the nearest window
     in Euclidean distance and the residual mismatch is reported through
     ``belief_distance``.
     """
     ctx = eval_set.ctx
     readout = ctx - 1 if readout_pos is None else readout_pos
-    lo = readout - suffix_len + 1
+    lo = readout - suffix_len
     if lo < 1:
         raise ValueError("readout position too early for the requested suffix length")
 
@@ -74,7 +81,7 @@ def make_contrast_pairs(
     if process.kind == "discrete":
         buckets: dict[tuple, list[int]] = {}
         for i in range(obs.shape[0]):
-            buckets.setdefault(tuple(obs[i, lo : readout + 1]), []).append(i)
+            buckets.setdefault(tuple(obs[i, lo:readout]), []).append(i)
         keys = [k for k, v in buckets.items() if len(v) > 1]
         if not keys:
             raise ValueError("no repeated suffixes; use a shorter suffix or more sequences")
@@ -87,7 +94,7 @@ def make_contrast_pairs(
             elif len(pairs) == 0 and len(keys) == 1:
                 break
     else:
-        suffix = obs[:, lo : readout + 1]
+        suffix = obs[:, lo:readout]
         for _ in range(n_pairs * 4):
             i = int(rng.integers(obs.shape[0]))
             d = np.linalg.norm(suffix - suffix[i], axis=1)
@@ -139,7 +146,7 @@ class Component:
             return f"blocks.{self.layer}.attn.hook_z"
         return f"blocks.{self.layer}.hook_mlp_out"
 
-    def index(self, positions: torch.Tensor | slice | None):
+    def index(self, positions: torch.Tensor | slice | int | None):
         pos = slice(None) if positions is None else positions
         if self.kind == "head":
             return (slice(None), pos, self.head)
@@ -198,12 +205,18 @@ def activation_patch(
     model: BeliefTransformer,
     pairs: ContrastPairs,
     components: list[Component] | None = None,
-    positions: slice | None = None,
-    batch: int | None = None,
+    positions: slice | int | None = None,
 ) -> list[PatchResult]:
     """Noising patch: run clean, splice in the corrupt activation, measure the damage.
 
-    ``positions`` restricts which sequence positions are patched (default: all).
+    ``positions`` defaults to the readout position alone, which asks the local
+    question this analysis is for: *which component writes the belief that the
+    prediction at this position depends on?*  Patching a component at every
+    position instead mixes one sequence's component with another sequence's
+    everything-else at each of them, which is far off-distribution and produces
+    effects of either sign that say little about the component.  Pass
+    ``positions=slice(None)`` for that variant deliberately.
+
     An effect is the mean increase in NLL of the clean observation at the readout
     position, so it is directly comparable to the model's optimality gap.
     """
@@ -211,6 +224,8 @@ def activation_patch(
     components = components or all_components(model)
     clean, corrupt = pairs.clean, pairs.corrupt
     pos = pairs.readout_pos
+    if positions is None:
+        positions = pos
 
     hooks = sorted({c.hook for c in components})
     _, corrupt_cache = model.run_with_cache(corrupt, names=hooks)
@@ -246,7 +261,7 @@ def attribution_patch(
     model: BeliefTransformer,
     pairs: ContrastPairs,
     components: list[Component] | None = None,
-    positions: slice | None = None,
+    positions: slice | int | None = None,
 ) -> list[PatchResult]:
     """First-order approximation to activation patching: (a_corrupt - a_clean) . dL/da.
 
@@ -256,6 +271,8 @@ def attribution_patch(
     """
     model.eval()
     components = components or all_components(model)
+    if positions is None:
+        positions = pairs.readout_pos
     hooks = sorted({c.hook for c in components})
 
     with torch.no_grad():
@@ -282,6 +299,7 @@ def attribution_patch(
         index = comp.index(positions)
         contrib = ((corrupt_cache[comp.hook][index] - act[index].detach()) * grad[index]).sum(-1)
         contrib = contrib.reshape(contrib.shape[0], -1).sum(-1).float().cpu().numpy()
+        del grad
         results.append(
             PatchResult(
                 label=comp.label,
@@ -329,7 +347,7 @@ def path_patch(
     pairs: ContrastPairs,
     sender: Component,
     receiver_hook: str,
-    positions: slice | None = None,
+    positions: slice | int | None = None,
 ) -> PatchResult:
     """Effect of the sender on the output *through* one receiver only.
 
@@ -341,6 +359,8 @@ def path_patch(
     """
     model.eval()
     pos = pairs.readout_pos
+    if positions is None:
+        positions = pos
     all_hooks = sorted({sender.hook, receiver_hook})
 
     _, clean_cache = model.run_with_cache(pairs.clean, names=all_hooks)

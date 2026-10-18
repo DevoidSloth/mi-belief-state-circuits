@@ -3,6 +3,7 @@
 from .base import FilterResult, Process
 from .continuous import GarchProcess, KalmanProcess, RegimeSwitchingVol
 from .hmm import HMM, slem, stationary_distribution
+from .mixture import MixtureOfProcesses
 from .registry import BUILDERS, DEFAULT_ZOO, SMOKE_ZOO, all_names, get_process
 
 __all__ = [
@@ -13,6 +14,7 @@ __all__ = [
     "FilterResult",
     "GarchProcess",
     "KalmanProcess",
+    "MixtureOfProcesses",
     "Process",
     "RegimeSwitchingVol",
     "all_names",

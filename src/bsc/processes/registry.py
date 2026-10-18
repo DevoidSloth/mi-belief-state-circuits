@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from .base import Process
+from .mixture import MixtureOfProcesses
 from .continuous import GarchProcess, KalmanProcess, RegimeSwitchingVol
 from .zoo import (
     drifting_coin,
@@ -48,6 +49,16 @@ BUILDERS: dict[str, Callable[[], Process]] = {
     "kalman_slow": lambda: KalmanProcess(a=0.995, c=1.0, snr=2.0),
     "garch": lambda: GarchProcess(alpha=0.10, beta=0.85),
     "regimevol": lambda: RegimeSwitchingVol((0.5, 1.0, 2.0), stay=0.98),
+    # -- families: one component drawn per sequence, for in-context inference --
+    "even_family": lambda: MixtureOfProcesses(
+        [even_process(p) for p in (0.2, 0.5, 0.8)], name="even_family"
+    ),
+    "mess3_family": lambda: MixtureOfProcesses(
+        [mess3(0.05, a) for a in (0.55, 0.75, 0.95)], name="mess3_family"
+    ),
+    "golden_family": lambda: MixtureOfProcesses(
+        [golden_mean(p) for p in (0.15, 0.4, 0.65, 0.9)], name="golden_family"
+    ),
 }
 
 #: processes used by the headline experiment sweep

@@ -173,6 +173,13 @@ def write_direction(probe: ProbeResult) -> torch.Tensor:
     The probe reads ``b = x W``.  To move the read-out by ``db`` with the smallest
     possible perturbation we need ``dx`` solving ``dx W = db``, whose minimum-norm
     solution is ``dx = db (W^T W)^{-1} W^T``.  Returns that (d_belief, d_model) map.
+
+    Note that ``W`` is rank-deficient whenever the belief is a simplex point:
+    beliefs sum to one, so their differences span only ``d_belief - 1``
+    dimensions and no perturbation can move the read-out off that affine hull.
+    The returned map is therefore a pseudo-inverse, exact on achievable belief
+    changes and damped elsewhere -- which is what the steering test needs, since
+    it only ever asks for differences between two real beliefs.
     """
     W = probe.W.double()
     gram = W.T @ W
