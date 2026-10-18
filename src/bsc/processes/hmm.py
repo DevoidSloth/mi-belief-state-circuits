@@ -136,6 +136,15 @@ class HMM(Process):
 
         return FilterResult(belief=belief, logp=logp, predictive={"pmf": pmf})
 
+    def predictive_from_belief(self, belief: np.ndarray) -> dict[str, np.ndarray]:
+        """Predictive pmf implied by an arbitrary belief vector.
+
+        Needed by the causal probe test: to ask whether the model *uses* a
+        decoded belief we must know what output that belief should produce.
+        """
+        pmf = np.einsum("...d,xdj->...x", np.asarray(belief), self.T)
+        return {"pmf": pmf / np.clip(pmf.sum(-1, keepdims=True), 1e-300, None)}
+
     # ---- entropy rate ---------------------------------------------------
 
     def entropy_rate(self) -> float | None:

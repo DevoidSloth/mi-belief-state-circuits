@@ -97,6 +97,11 @@ class KalmanProcess(Process):
             y[:, t] = self.c * x + rng.normal(0.0, np.sqrt(self.r), size=n_seq)
         return y
 
+    def predictive_from_belief(self, belief: np.ndarray) -> dict[str, np.ndarray]:
+        """Steady-state predictive density implied by a latent mean."""
+        m = np.asarray(belief)[..., 0]
+        return {"mean": self.c * m, "var": np.full_like(m, self.steady_state()["S"])}
+
     def filter(self, obs: np.ndarray) -> FilterResult:
         obs = np.asarray(obs, dtype=np.float64)
         n, length = obs.shape
@@ -166,6 +171,10 @@ class GarchProcess(Process):
             out[:, t] = r
         return out
 
+    def predictive_from_belief(self, belief: np.ndarray) -> dict[str, np.ndarray]:
+        v = np.exp(np.asarray(belief)[..., 0])
+        return {"mean": np.zeros_like(v), "var": v}
+
     def filter(self, obs: np.ndarray) -> FilterResult:
         obs = np.asarray(obs, dtype=np.float64)
         n, length = obs.shape
@@ -232,6 +241,12 @@ class RegimeSwitchingVol(Process):
             u = rng.random(n_seq)
             s = (cdf[s] < u[:, None]).sum(axis=1).clip(0, self.k - 1)
         return out
+
+    def predictive_from_belief(self, belief: np.ndarray) -> dict[str, np.ndarray]:
+        w = np.asarray(belief)
+        w = w / np.clip(w.sum(-1, keepdims=True), 1e-300, None)
+        var = np.broadcast_to(self.sigma2, w.shape).copy()
+        return {"weights": w, "means": np.zeros_like(var), "vars": var}
 
     def filter(self, obs: np.ndarray) -> FilterResult:
         obs = np.asarray(obs, dtype=np.float64)

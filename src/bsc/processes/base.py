@@ -76,6 +76,10 @@ class Process(abc.ABC):
     def filter(self, obs: np.ndarray) -> FilterResult:
         """Run the exact optimal filter over observations."""
 
+    def predictive_from_belief(self, belief: np.ndarray) -> dict[str, np.ndarray]:
+        """Predictive distribution implied by an arbitrary (possibly steered) belief."""
+        raise NotImplementedError
+
     def entropy_rate(self) -> float | None:
         """Closed-form entropy rate in nats/symbol, or None when no closed form exists."""
         return None
