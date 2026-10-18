@@ -12,6 +12,7 @@ from . import (
     exp05_sae,
     exp06_capacity,
     exp07_incontext,
+    exp08_architecture,
 )
 
 EXPERIMENTS: dict[str, Callable[..., dict]] = {
@@ -22,9 +23,19 @@ EXPERIMENTS: dict[str, Callable[..., dict]] = {
     "sae": exp05_sae.run,
     "capacity": exp06_capacity.run,
     "incontext": exp07_incontext.run,
+    "architecture": exp08_architecture.run,
 }
 
 #: order matters: later experiments reuse checkpoints the earlier ones trained
-ORDER = ("optimality", "geometry", "circuits", "kalman", "sae", "capacity", "incontext")
+ORDER = (
+    "optimality",
+    "geometry",
+    "circuits",
+    "kalman",
+    "sae",
+    "capacity",
+    "incontext",
+    "architecture",
+)
 
 __all__ = ["EXPERIMENTS", "ORDER"]

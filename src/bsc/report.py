@@ -21,6 +21,7 @@ FILES = {
     "sae": "exp05_sae.json",
     "capacity": "exp06_capacity.json",
     "incontext": "exp07_incontext.json",
+    "architecture": "exp08_architecture.json",
 }
 
 
@@ -307,6 +308,60 @@ def _section_incontext(d) -> str:
     )
 
 
+def _section_architecture(d) -> str:
+    if not d:
+        return "_not run_\n"
+    depths = sorted({r["n_layers"] for r in d["grid"]})
+    widths = sorted({r["d_model"] for r in d["grid"]})
+    lookup = {(r["n_layers"], r["d_model"]): r for r in d["grid"]}
+    rows = []
+    for layers in depths:
+        cells = []
+        for w in widths:
+            r = lookup.get((layers, w))
+            cells.append(f"{r['gap']:+.4f}" if r else "-")
+        rows.append([f"{layers} layer" + ("s" if layers > 1 else ""), *cells])
+    body = _table(["depth / $d_{model}$", *[str(w) for w in widths]], rows)
+
+    s = d["summary"]
+    smallest = s.get("smallest_within_0.01_nats")
+    note = ""
+    if smallest:
+        note = (
+            "\n\nSmallest configuration within 0.01 nats of the optimum: "
+            f"**{smallest['n_layers']} layer(s), $d_{{model}}$ = {smallest['d_model']}, "
+            f"{smallest['n_params']:,} parameters** (gap {smallest['gap']:+.5f}).\n"
+        )
+
+    ctx_rows = []
+    for name, c in s["context"].items():
+        ctxs = sorted(c["gap_by_ctx"], key=int)
+        longest = ctxs[-1]
+        ctx_rows.append(
+            [
+                name,
+                "non-mixing" if c["non_mixing"] else "mixing",
+                _fmt(c["oracle_context_gain_by_ctx"][longest], 4),
+                _fmt(c["model_context_gain_by_ctx"][longest], 4),
+                _fmt(c["tracking_ratio_at_longest"], 3),
+                _fmt(c["gap_by_ctx"][longest], 5),
+            ]
+        )
+    ctx = _table(
+        ["process", "regime", "optimal gain from context", "model gain", "ratio", "gap"],
+        ctx_rows,
+    )
+    return (
+        "**Optimality gap by depth and width** (nats/token):\n\n"
+        + body
+        + note
+        + "\n**Context length.** For a mixing process the optimal loss plateaus at the entropy "
+        "rate and extra context is worthless past the mixing time. For a non-mixing one the "
+        "belief never forgets, only sharpens, so the optimal loss keeps falling with position; "
+        "the ratio column is how much of that fall the model reproduces.\n\n" + ctx + "\n"
+    )
+
+
 def _resume_table(d) -> str:
     """The brief's resume-number table, filled from measured values."""
     rows = []
@@ -418,6 +473,7 @@ def build_report(path: str | Path | None = None) -> Path:
         ("5. Sparse autoencoders on a dense variable", "sae", _section_sae),
         ("6. What replaces exact inference when capacity runs out", "capacity", _section_capacity),
         ("7. Inference over a family of processes", "incontext", _section_incontext),
+        ("8. Depth, width and context length", "architecture", _section_architecture),
     ]:
         parts += [f"## {title}", "", fn(d[key]), ""]
 
