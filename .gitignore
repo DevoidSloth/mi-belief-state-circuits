@@ -94,7 +94,11 @@ rpc_endpoints.toml
 .DS_Store
 Thumbs.db
 desktop.ini
-results/
-!results/.gitkeep
+
+# Trained weights are reproducible from the recipes in experiments/common.py
 checkpoints/
 *.pt
+
+# Results themselves are committed -- they are the deliverable. Only the raw
+# run log is not.
+results/run_all.log
