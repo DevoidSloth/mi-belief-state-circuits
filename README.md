@@ -16,6 +16,11 @@ right algorithm?" stops being a story and becomes a measurement — the model's
 loss minus the analytic entropy rate, the probe's R² against the *exact*
 posterior, the learned OV circuit against the *analytic* Kalman gain.
 
+## Quick start
+
+Requires Python 3.10+ and PyTorch 2.2+. A GPU helps for `bsc run all` but is not
+required; everything else runs comfortably on a CPU.
+
 ```bash
 pip install -e ".[dev]"
 bsc processes          # the zoo, with its analytic facts
@@ -26,6 +31,12 @@ pytest                 # 105 tests, mostly ground-truth checks
 
 Measured results live in [`results/RESULTS.md`](results/RESULTS.md), rebuilt from
 the JSON the experiments write. Nothing in that file is typed by hand.
+
+**Contents:** [What is verified](#what-is-actually-verified) ·
+[The zoo](#the-zoo) · [Design decisions](#design-decisions-worth-knowing-about) ·
+[The traps](#the-traps-and-what-was-done-about-them) ·
+[First-attempt bugs](#two-things-that-were-wrong-on-the-first-attempt) ·
+[Layout](#layout) · [Reading](#reading)
 
 ---
 
