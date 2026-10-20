@@ -58,33 +58,53 @@ def _section_optimality(d) -> str:
     for r in d["rows"]:
         f, t = r["facts"], r["transformer"]
         h = f.get("entropy_rate_closed_form") or f.get("entropy_rate_msp")
-        finite = r.get("ngram", r.get("linear", {}))
+        ng = r.get("ngram")
+        finite = ng or r.get("linear", {})
+        if ng:
+            table = (f["vocab_size"] + 1) ** ng["order"]
+            memory = f"order {ng['order']} ({table:,} contexts)"
+        else:
+            memory = "linear, window 8"
         rows.append(
             [
                 r["process"],
                 "yes" if f.get("unifilar") else ("no" if "unifilar" in f else "-"),
                 _fmt(h, 4),
                 _fmt(t["oracle_loss"], 4),
-                _fmt(t["loss"], 4),
                 f"{t['gap']:+.5f} ± {t['gap_stderr']:.5f}",
                 _fmt(finite.get("gap"), 4),
+                memory,
                 _fmt(r.get("gru", {}).get("gap"), 4),
+                f["d_belief"],
                 r["n_params"],
             ]
         )
     s = d["summary"]
     body = _table(
-        ["process", "unifilar", "h (analytic)", "oracle", "model", "optimality gap",
-         "finite-memory gap", "GRU gap", "params"],
+        ["process", "unifilar", "h (analytic)", "oracle", "optimality gap",
+         "finite-memory gap", "best finite model", "GRU gap", "belief dim", "params"],
         rows,
     )
     return (
         f"{body}\n\n"
         f"- {s['n_within_0.01_nats']}/{s['n_processes']} processes within 0.01 nats/token of the "
         f"analytic optimum; median gap **{s['median_gap']:+.5f}**, worst **{s['max_gap']:+.5f}**.\n"
-        f"- {s['n_processes_with_separation_over_0.15']}/{s['n_processes']} processes have a "
-        f"finite-memory baseline more than 0.15 nats above the optimum, i.e. genuinely require a "
-        f"belief state: {', '.join(s['processes_with_separation_over_0.15']) or 'none'}.\n"
+        f"- Only {s['n_processes_with_separation_over_0.15']}/{s['n_processes']} processes have a "
+        f"finite-memory baseline more than 0.15 nats above the optimum "
+        f"({', '.join(s['processes_with_separation_over_0.15']) or 'none'}), and that is the "
+        f"expected answer rather than a disappointing one. For any *mixing* process the belief "
+        f"depends on the recent past with exponentially decaying weight, so an order-k Markov "
+        f"table is exponentially good in k — finite memory is nearly sufficient **by "
+        f"construction**. Finite memory only fails outright where the memory requirement is "
+        f"unbounded or exact: parity counting (`even`), phase alignment (`rrxor`), a latent that "
+        f"never resets (`persistent_bit`) or one that drifts slower than any practical window "
+        f"(`drifting_coin`).\n"
+        f"- The interesting contrast is therefore not loss but **size**. Compare the last two "
+        f"columns: the belief state is a handful of numbers, while the finite-memory model that "
+        f"nearly matches it needs a table with as many rows as the 'best finite model' column "
+        f"reports. A belief state buys compression of the computation, not always a better "
+        f"achievable loss — which is precisely why the mechanism, not the loss, is the thing "
+        f"worth reverse-engineering.\n"
     )
 
 
@@ -122,7 +142,14 @@ def _section_geometry(d) -> str:
         )
     anti = d["summary"]["processes_where_r2_and_causal_use_anticorrelate"]
     note = (
-        f"\n\n- Probe R² and causal use **anti-correlate across layers** on "
+        "\n\n- *Causal margin* is the fraction of KL-to-the-target-belief closed by steering "
+        "along the probe direction, **minus** the fraction closed by a norm-matched random "
+        "direction. The subtraction is essential: any large perturbation flattens the output, "
+        "and a flat distribution has lower KL to the target than a confident wrong one, so the "
+        "raw effect alone overstates. A margin above 1 means the random control made things "
+        "*worse* while steering made them better. Steering strength is chosen on one half of "
+        "the pairs and the margin reported on the other.\n"
+        f"- Probe R² and causal use **anti-correlate across layers** on "
         f"{len(anti)}/{d['summary']['n_processes']} processes ({', '.join(anti) or 'none'}): the "
         f"layers where the belief is most decodable are not the layers where perturbing it moves "
         f"the output most. High R² is not evidence of use.\n"

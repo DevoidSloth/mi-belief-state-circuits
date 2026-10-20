@@ -89,12 +89,15 @@ errors here are silent and would corrupt every probe and patch, so the
 convention is stated once in `processes/base.py` and enforced by tests.
 
 **Mess3 is used in two parameterisations.** The canonical `mess3(0.15, 0.6)` from
-the belief-state-geometry literature has only ~0.009 nats of total
-predictability — an n-gram is within 0.009 nats of optimal, so it cannot support
-a circuit claim. It is kept for reproducing the fractal; `mess3_hard(0.05, 0.85)`
-has the same structure with ~0.3 nats of signal and carries the quantitative
-claims. Baseline separation is reported for every process so this is visible
-rather than hidden.
+the belief-state-geometry literature has only ~0.009 nats of total predictability
+— almost nothing to learn, so the loss curve cannot distinguish anything. It is
+kept for reproducing the fractal; `mess3_hard(0.05, 0.85)` has the same structure
+with ~0.3 nats of predictability and carries the quantitative claims.
+
+Note the distinction that measuring this forced: *total predictability*
+(`H(marginal) − h`) is what the process offers, and it is 30× larger for
+`mess3_hard`. *Finite-memory separation* (n-gram loss − optimal loss) is
+something else, and it is small for **both**, because Mess3 mixes. See below.
 
 **A self-contained hooked transformer.** TransformerLens-compatible hook names
 (`blocks.0.attn.hook_z`, `blocks.1.hook_resid_post`, …) over ~150 lines with no
@@ -123,7 +126,22 @@ and how many seeds reproduce the core.
 **"A task so simple the optimal predictor is a bigram table."** An n-gram
 baseline (order and smoothing tuned on validation) and a linear finite-window
 baseline are trained for every process, and their gap to the optimum is printed
-next to the model's. Processes that fail the bar are named, not dropped.
+next to the model's. Processes that fail the bar are named, not dropped — and
+measuring it properly changed what the bar means.
+
+For any *mixing* process the belief depends on the recent past with
+exponentially decaying weight, so an order-*k* Markov table is exponentially
+good in *k*. Finite memory is therefore nearly sufficient **by construction**,
+and most of the zoo shows a small n-gram gap. It fails outright only where the
+memory requirement is unbounded or exact: parity counting (`even`), phase
+alignment (`rrxor`), a latent that never resets (`persistent_bit`), one that
+drifts slower than any practical window (`drifting_coin`).
+
+So the honest contrast is not loss but **size**. A belief state is a handful of
+numbers; the n-gram table that nearly matches it has *V^k* rows. What a belief
+state buys is compression of the computation, not always a better achievable
+loss — which is exactly why the mechanism, rather than the loss, is the thing
+worth reverse-engineering. Both columns are in the results table.
 
 **"SAE reconstruction fine, features uninterpretable."** L0, variance explained
 *and* downstream loss recovered are all reported, at four L1 strengths.
