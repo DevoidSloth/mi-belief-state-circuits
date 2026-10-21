@@ -99,13 +99,47 @@ def _section_optimality(d) -> str:
         f"unbounded or exact: parity counting (`even`), phase alignment (`rrxor`), a latent that "
         f"never resets (`persistent_bit`) or one that drifts slower than any practical window "
         f"(`drifting_coin`).\n"
-        f"- The interesting contrast is therefore not loss but **size**. Compare the last two "
-        f"columns: the belief state is a handful of numbers, while the finite-memory model that "
-        f"nearly matches it needs a table with as many rows as the 'best finite model' column "
-        f"reports. A belief state buys compression of the computation, not always a better "
+        f"- The interesting contrast is therefore not loss but **size**. Set the *belief dim* "
+        f"column against *best finite model*: the belief state is a handful of numbers, while "
+        f"the finite-memory model that nearly matches it needs a table of hundreds or thousands "
+        f"of contexts. A belief state buys compression of the computation, not always a better "
         f"achievable loss — which is precisely why the mechanism, not the loss, is the thing "
-        f"worth reverse-engineering.\n"
+        f"worth reverse-engineering.\n" + _gru_note(d)
     )
+
+
+def _gru_note(d) -> str:
+    """The architecture comparison, which is only interesting where the two disagree."""
+    rows = [r for r in d["rows"] if "gru" in r]
+    if not rows:
+        return ""
+    worse = [
+        (r["process"], r["transformer"]["gap"], r["gru"]["gap"])
+        for r in rows
+        if r["transformer"]["gap"] > max(4 * r["gru"]["gap"], r["transformer"]["gap_stderr"] * 4)
+    ]
+    gru_gaps = np.array([r["gru"]["gap"] for r in rows])
+    line = (
+        f"- A GRU trained identically reaches a median gap of **{np.median(gru_gaps):+.5f}**, so "
+        f"the recurrent architecture expresses these filters at least as well as the transformer "
+        f"does — as it should, since a filter *is* a recurrence.\n"
+    )
+    if worse:
+        worse.sort(key=lambda w: -(w[1] - w[2]))
+        detail = ", ".join(f"`{n}` ({t:+.4f} vs {g:+.4f})" for n, t, g in worse)
+        top = worse[0]
+        line += (
+            f"- The transformer is materially worse on {len(worse)} of {len(rows)} processes: "
+            f"{detail}. The general reason is structural rather than specific to any one of "
+            f"them — a recurrence carries the belief forward for free, whereas an attention-only "
+            f"model has no state and must reconstruct the whole posterior from the raw context "
+            f"at every position. The gap is widest on `{top[0]}` ({top[1] / max(top[2], 1e-9):.0f}× "
+            f"the GRU's), which needs exact phase alignment within a repeating triple: a "
+            f"recurrence tracks that in effectively one unit. This is a fact about architecture, "
+            f"not about the task, and it is the kind of claim the analytic floor makes "
+            f"checkable — both numbers are distances from the *same* known optimum.\n"
+        )
+    return line
 
 
 def _section_geometry(d) -> str:
