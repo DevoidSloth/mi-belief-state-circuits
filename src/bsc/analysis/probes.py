@@ -280,49 +280,73 @@ def steering_test(
     unit_rand = torch.randn(base_delta.shape, generator=gen).to(device)
     unit_rand = unit_rand / unit_rand.norm(dim=-1, keepdim=True).clamp_min(1e-9)
 
-    half = n_pairs // 2
-    select = slice(0, half)
-    report = slice(half, n_pairs)
-
     kl0 = kl_per_pair(run(None))
+
+    # Drop pairs the model already predicts correctly. Their KL-to-target is
+    # ~0, and a per-pair ratio against it explodes: a single pair at 1e-9
+    # dominates the mean and produces "effects" in the thousands. Fractions are
+    # then formed from *aggregate* KL rather than averaged per-pair ratios,
+    # which is the stable estimator.
+    keep = kl0 > max(1e-6, 0.05 * float(kl0.median()))
+    if int(keep.sum()) < 32:
+        keep = kl0 > 1e-9
+    idx_keep = keep.nonzero(as_tuple=True)[0]
+    half = len(idx_keep) // 2
+    select, report = idx_keep[:half], idx_keep[half:]
+
+    def fractions(kl_a, kl_c, where):
+        before = kl0[where].mean()
+        eff = 1.0 - kl_a[where].mean() / before.clamp_min(1e-12)
+        ctl = 1.0 - kl_c[where].mean() / before.clamp_min(1e-12)
+        return float(eff), float(ctl)
+
+    def bootstrap_margin_se(kl_a, kl_c, where, n_boot: int = 400) -> float:
+        g = torch.Generator(device="cpu").manual_seed(seed + 17)
+        b = kl0[where].cpu()
+        a = kl_a[where].cpu()
+        c = kl_c[where].cpu()
+        n = b.numel()
+        if n < 4:
+            return float("nan")
+        draws = torch.randint(0, n, (n_boot, n), generator=g)
+        bb = b[draws].mean(1).clamp_min(1e-12)
+        margins = (c[draws].mean(1) - a[draws].mean(1)) / bb
+        return float(margins.std(unbiased=True))
+
     by_strength: dict[str, dict] = {}
     best_s, best_margin = strengths[0], -np.inf
+    cache: dict[float, tuple] = {}
     for st in strengths:
         delta = st * base_delta
         rand = unit_rand * delta.norm(dim=-1, keepdim=True)
         kl_a = kl_per_pair(run(delta))
         kl_c = kl_per_pair(run(rand))
-        eff = 1.0 - (kl_a / kl0.clamp_min(1e-12))
-        ctl = 1.0 - (kl_c / kl0.clamp_min(1e-12))
+        cache[st] = (kl_a, kl_c, float(delta.norm(dim=-1).mean()))
+        eff_all, ctl_all = fractions(kl_a, kl_c, idx_keep)
         by_strength[str(st)] = {
-            "effect": float(eff.mean()),
-            "control_effect": float(ctl.mean()),
-            "margin": float((eff - ctl).mean()),
-            "delta_norm": float(delta.norm(dim=-1).mean()),
+            "effect": eff_all,
+            "control_effect": ctl_all,
+            "margin": eff_all - ctl_all,
+            "delta_norm": cache[st][2],
         }
-        sel_margin = float((eff - ctl)[select].mean())
-        if sel_margin > best_margin:
-            best_margin, best_s = sel_margin, st
+        sel_eff, sel_ctl = fractions(kl_a, kl_c, select)
+        if sel_eff - sel_ctl > best_margin:
+            best_margin, best_s = sel_eff - sel_ctl, st
 
-    delta = best_s * base_delta
-    rand = unit_rand * delta.norm(dim=-1, keepdim=True)
-    kl_a = kl_per_pair(run(delta))
-    kl_c = kl_per_pair(run(rand))
-    eff = 1.0 - (kl_a / kl0.clamp_min(1e-12))
-    ctl = 1.0 - (kl_c / kl0.clamp_min(1e-12))
-    margin = (eff - ctl)[report]
+    kl_a, kl_c, dnorm = cache[best_s]
+    eff, ctl = fractions(kl_a, kl_c, report)
 
     return SteeringResult(
         hook=hook,
         kl_before=float(kl0[report].mean()),
         kl_after=float(kl_a[report].mean()),
         kl_random_control=float(kl_c[report].mean()),
-        effect=float(eff[report].mean()),
-        control_effect=float(ctl[report].mean()),
-        margin=float(margin.mean()),
-        margin_stderr=float(margin.std(unbiased=True) / np.sqrt(margin.numel())),
+        effect=eff,
+        control_effect=ctl,
+        margin=eff - ctl,
+        margin_stderr=bootstrap_margin_se(kl_a, kl_c, report),
         best_strength=float(best_s),
-        delta_norm=float(delta.norm(dim=-1).mean()),
-        n_pairs=n_pairs - half,
+        delta_norm=dnorm,
+        n_pairs=int(report.numel()),
         by_strength=by_strength,
     )

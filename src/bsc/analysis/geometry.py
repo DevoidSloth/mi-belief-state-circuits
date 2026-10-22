@@ -31,15 +31,35 @@ class PCAResult:
 
 
 def pca(X: np.ndarray, k: int = 2) -> PCAResult:
+    """Principal components via the covariance eigendecomposition.
+
+    Not via ``svd`` of the data matrix: LAPACK's divide-and-conquer SVD fails to
+    converge on some residual-stream activations (float32, strongly
+    ill-conditioned, tens of thousands of rows), and it does so as an exception
+    rather than a warning.  ``d_model`` here is at most a few hundred, so the
+    d x d covariance is both tiny and symmetric, and ``eigh`` on it always
+    converges.
+    """
     X = np.asarray(X, dtype=np.float64)
+    finite = np.isfinite(X).all(axis=1)
+    if not finite.all():
+        X = X[finite]
+    if len(X) < 2:
+        raise ValueError("need at least two finite rows for PCA")
+
     mean = X.mean(0)
     Xc = X - mean
-    _, s, vt = np.linalg.svd(Xc, full_matrices=False)
-    var = s**2 / max(len(X) - 1, 1)
+    cov = (Xc.T @ Xc) / (len(X) - 1)
+    cov = (cov + cov.T) / 2.0  # symmetrise away round-off before eigh
+    vals, vecs = np.linalg.eigh(cov)
+    order = np.argsort(vals)[::-1]
+    vals = np.clip(vals[order], 0.0, None)
+    vecs = vecs[:, order]
+    total = vals.sum()
     return PCAResult(
-        components=vt[:k],
+        components=vecs[:, :k].T,
         mean=mean,
-        explained_variance_ratio=var[:k] / var.sum(),
+        explained_variance_ratio=vals[:k] / (total if total > 0 else 1.0),
     )
 
 
