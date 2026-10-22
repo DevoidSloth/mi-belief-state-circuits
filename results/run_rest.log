@@ -1,0 +1,29 @@
+=== geometry ===
+
+=== geometry ====================================================
+  mess3            best R2=0.9060 @ blocks.0.hook_resid_mi best causal margin=+0.748 @ blocks.0.hook_resid_pr
+  mess3_hard       best R2=0.9808 @ blocks.3.hook_resid_po best causal margin=+0.627 @ blocks.0.hook_resid_pr
+  even             best R2=0.9966 @ blocks.1.hook_resid_po best causal margin=+0.744 @ blocks.0.hook_resid_pr
+  rrxor            best R2=0.5448 @ blocks.1.hook_resid_po best causal margin=+0.370 @ blocks.1.hook_resid_po
+  sns              best R2=0.9893 @ blocks.1.hook_resid_po best causal margin=+0.272 @ blocks.1.hook_resid_po
+  drifting_coin    best R2=0.9812 @ blocks.2.hook_resid_po best causal margin=+0.171 @ blocks.0.hook_resid_mi
+  random_non       best R2=0.7699 @ blocks.0.hook_resid_pr best causal margin=+0.656 @ blocks.2.hook_resid_mi
+  kalman           best R2=0.9998 @ blocks.0.hook_resid_po best causal margin=+26681.794 @ blocks.0.hook_resid_pr
+  garch            best R2=0.9909 @ blocks.2.hook_resid_po best causal margin=+0.590 @ blocks.2.hook_resid_po
+  regimevol        best R2=0.9751 @ blocks.2.hook_resid_po best causal margin=+0.013 @ blocks.1.hook_resid_mi
+--- geometry done in 107s
+=== circuits ===
+
+=== circuits ====================================================
+  even           seed=0 circuit=8/10 faith(exact)=0.995 faith(belief)=0.997 attrib r=-0.40 ablate L0MLP KL x15979
+  even           seed=1 circuit=7/10 faith(exact)=0.974 faith(belief)=0.996 attrib r=-0.75 ablate L0MLP KL x598
+  even           seed=2 circuit=6/10 faith(exact)=0.973 faith(belief)=0.999 attrib r=-0.71 ablate L0MLP KL x4075
+  even           seed=3 circuit=9/10 faith(exact)=0.998 faith(belief)=0.986 attrib r=-0.81 ablate L0MLP KL x1644
+  even           seed=4 circuit=7/10 faith(exact)=0.948 faith(belief)=0.960 attrib r=-0.86 ablate L0H2 KL x1531
+  rrxor          seed=0 circuit=10/10 faith(exact)=1.000 faith(belief)=-0.128 attrib r=+0.53 ablate L0H0 KL x26
+  rrxor          seed=1 circuit=10/10 faith(exact)=1.000 faith(belief)=0.523 attrib r=+0.48 ablate L1MLP KL x15
+  rrxor          seed=2 circuit=10/10 faith(exact)=1.000 faith(belief)=-0.181 attrib r=-0.10 ablate L0MLP KL x25
+  rrxor          seed=3 circuit=10/10 faith(exact)=1.000 faith(belief)=-0.471 attrib r=-0.30 ablate L1MLP KL x25
+  rrxor          seed=4 circuit=10/10 faith(exact)=1.000 faith(belief)=0.340 attrib r=+0.83 ablate L0MLP KL x32
+  mess3_hard     seed=0 circuit=12/20 faith(exact)=0.912 faith(belief)=0.971 attrib r=+0.90 ablate L0MLP KL x88
+  mess3_hard     seed=1 circuit=10/20 faith(exact)=0.905 faith(belief)=0.969 attrib r=-0.23 ablate L0MLP KL x70

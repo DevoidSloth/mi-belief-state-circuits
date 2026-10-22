@@ -20,6 +20,7 @@ import numpy as np
 
 from ..analysis.geometry import (
     belief_dimension_estimate,
+    pca,
     plot_belief_geometry,
     residual_projection,
     simplex_to_2d,
@@ -100,14 +101,17 @@ def run(
                 np.corrcoef(np.argsort(np.argsort(r2s)), np.argsort(np.argsort(margins)))[0, 1]
             )
 
-        if name in FRACTAL_PROCESSES or process.d_belief == 3:
+        # A box-counting dimension is only meaningful when the reachable belief
+        # set can itself be two-dimensional. For a 2-state process the simplex is
+        # a line segment, so the statistic is degenerate and is not reported.
+        if process.d_belief >= 3:
             proj = residual_projection(
                 model, eval_set, best_r2["hook"], burn_in=burn_in, max_points=60000
             )
             true_xy = (
                 simplex_to_2d(proj["belief"])
                 if proj["belief"].shape[-1] == 3
-                else proj["belief"][:, :2]
+                else pca(proj["belief"], 2).transform(proj["belief"])
             )
             row["box_dimension"] = {
                 "true_belief_set": belief_dimension_estimate(true_xy),

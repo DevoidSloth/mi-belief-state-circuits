@@ -300,6 +300,19 @@ def steering_test(
         ctl = 1.0 - kl_c[where].mean() / before.clamp_min(1e-12)
         return float(eff), float(ctl)
 
+    def margin_of(eff: float, ctl: float) -> float:
+        """Effect above the share a nonspecific perturbation could account for.
+
+        The control is floored at zero before subtracting.  A random direction
+        that makes the output *worse* than baseline explains none of the effect,
+        and letting a large negative control inflate the margin produces numbers
+        in the thousands whenever the model is confident enough that a random
+        perturbation is catastrophic -- which says something about the model's
+        fragility, not about the probe.  Floored this way the margin is at most
+        1, and the raw control is reported alongside it.
+        """
+        return eff - max(ctl, 0.0)
+
     def bootstrap_margin_se(kl_a, kl_c, where, n_boot: int = 400) -> float:
         g = torch.Generator(device="cpu").manual_seed(seed + 17)
         b = kl0[where].cpu()
@@ -310,7 +323,9 @@ def steering_test(
             return float("nan")
         draws = torch.randint(0, n, (n_boot, n), generator=g)
         bb = b[draws].mean(1).clamp_min(1e-12)
-        margins = (c[draws].mean(1) - a[draws].mean(1)) / bb
+        eff = 1.0 - a[draws].mean(1) / bb
+        ctl = 1.0 - c[draws].mean(1) / bb
+        margins = eff - ctl.clamp_min(0.0)
         return float(margins.std(unbiased=True))
 
     by_strength: dict[str, dict] = {}
@@ -326,12 +341,12 @@ def steering_test(
         by_strength[str(st)] = {
             "effect": eff_all,
             "control_effect": ctl_all,
-            "margin": eff_all - ctl_all,
+            "margin": margin_of(eff_all, ctl_all),
             "delta_norm": cache[st][2],
         }
-        sel_eff, sel_ctl = fractions(kl_a, kl_c, select)
-        if sel_eff - sel_ctl > best_margin:
-            best_margin, best_s = sel_eff - sel_ctl, st
+        sel = margin_of(*fractions(kl_a, kl_c, select))
+        if sel > best_margin:
+            best_margin, best_s = sel, st
 
     kl_a, kl_c, dnorm = cache[best_s]
     eff, ctl = fractions(kl_a, kl_c, report)
@@ -343,7 +358,7 @@ def steering_test(
         kl_random_control=float(kl_c[report].mean()),
         effect=eff,
         control_effect=ctl,
-        margin=eff - ctl,
+        margin=margin_of(eff, ctl),
         margin_stderr=bootstrap_margin_se(kl_a, kl_c, report),
         best_strength=float(best_s),
         delta_norm=dnorm,
