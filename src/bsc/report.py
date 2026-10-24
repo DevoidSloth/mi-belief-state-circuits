@@ -197,13 +197,39 @@ def _section_geometry(d) -> str:
 def _section_circuits(d) -> str:
     if not d:
         return "_not run_\n"
+    # faithfulness at a fixed budget, read out of each seed's greedy trace.
+    # "Size needed to reach 0.9" is vacuous when the answer is "all of them",
+    # because keeping every component resamples nothing and scores 1.0 by
+    # construction. Faithfulness at a quarter and a half of the components is
+    # the statistic that stays informative in that case.
+    budget: dict[str, dict] = {}
+    for r in d["rows"]:
+        trace = r.get("greedy_search", {}).get("trace", [])
+        n = r["n_components"]
+        entry = budget.setdefault(r["process"], {"quarter": [], "half": [], "saturated": 0, "n": 0})
+        entry["n"] += 1
+        entry["saturated"] += int(r["circuit_size"] >= n)
+        for key, frac in (("quarter", 0.25), ("half", 0.5)):
+            size = max(1, int(round(frac * n)))
+            hit = [t for t in trace if t["size"] <= size]
+            if hit:
+                entry[key].append(hit[-1]["faithfulness"])
+
     rows = []
     for name, s in d["summary"].items():
+        b = budget.get(name, {})
+        size = (
+            "all"
+            if b.get("saturated", 0) == b.get("n", 1)
+            else f"{s['circuit_size_mean']:.1f} ± {s['circuit_size_std']:.1f}"
+        )
         rows.append(
             [
                 name,
-                f"{s['circuit_size_mean']:.1f} ± {s['circuit_size_std']:.1f} / {s['n_components']}",
-                f"{s['faithfulness_exact_mean']:.3f} ± {s['faithfulness_exact_std']:.3f}",
+                s["n_components"],
+                f"{size} / {s['n_components']}",
+                _fmt(np.mean(b["quarter"]) if b.get("quarter") else None, 3),
+                _fmt(np.mean(b["half"]) if b.get("half") else None, 3),
                 _fmt(s["faithfulness_belief_mean"], 3),
                 s["seeds_reproducing_core"],
                 ", ".join(s["always_present_components"]) or "none",
@@ -212,11 +238,21 @@ def _section_circuits(d) -> str:
             ]
         )
     body = _table(
-        ["process", "circuit size", "faithfulness (sufficiency)",
-         "faithfulness (belief-only)", "seeds reproducing core", "core components",
-         "attribution r", "top-component ablation"],
+        ["process", "components", "size to reach 0.90", "faithfulness at 25%",
+         "at 50%", "faithfulness (belief-only)", "seeds reproducing core",
+         "core components", "attribution r", "top-component ablation"],
         rows,
     )
+    saturated = [n for n, b in budget.items() if b["saturated"] == b["n"]]
+    if saturated:
+        body += (
+            f"\n\n> **No sparse circuit exists for {', '.join(saturated)}.** The greedy search "
+            f"only reaches the target by keeping every component, and keeping everything "
+            f"resamples nothing and scores 1.000 by construction. Read the 25% and 50% columns "
+            f"instead: they say how much of the computation a genuinely sparse subgraph "
+            f"recovers, and for these processes the answer is 'not much'. That is a result "
+            f"about the model — the computation is distributed — not a failure of the search."
+        )
     return (
         body
         + "\n\n- *Faithfulness* is measured against the best **context-free** predictor, not "
