@@ -172,16 +172,31 @@ def _cosine(a: np.ndarray, b: np.ndarray) -> float:
     return float(a @ b / max(na * nb, 1e-12))
 
 
-def _decay_rate(kernel: np.ndarray, max_lag: int | None = None) -> tuple[float, float]:
-    """Geometric decay rate of a kernel, from a log-linear fit. Returns (rate, r2)."""
+def _decay_rate(
+    kernel: np.ndarray, max_lag: int | None = None, floor_frac: float = 1e-2
+) -> tuple[float, float]:
+    """Geometric decay rate of a kernel, from a log-linear fit. Returns (rate, r2).
+
+    The fit is restricted to lags where the kernel is still at least
+    ``floor_frac`` of its peak.  An exponential kernel decays into the numerical
+    noise of the Jacobian estimate within twenty lags or so, and including those
+    points fits a straight line through noise, which biases the slope by several
+    percent while leaving the fit's R^2 looking healthy.  The kernel *cosine*
+    against the analytic gain is the robust statistic; this one is reported
+    because a decay rate is the interpretable form of the same claim.
+    """
     k = kernel[: max_lag or len(kernel)]
-    mask = k > 1e-6
+    peak = float(np.max(np.abs(k))) if k.size else 0.0
+    mask = k > max(peak * floor_frac, 1e-9)
+    if mask.sum() < 3:
+        mask = k > 1e-9
     if mask.sum() < 3:
         return float("nan"), float("nan")
     lags = np.arange(len(k))[mask]
-    slope, intercept = np.polyfit(lags, np.log(k[mask]), 1)
-    pred = slope * lags + intercept
-    r2 = 1.0 - ((np.log(k[mask]) - pred) ** 2).sum() / max(np.log(k[mask]).var() * mask.sum(), 1e-12)
+    logk = np.log(k[mask])
+    slope, intercept = np.polyfit(lags, logk, 1)
+    resid = logk - (slope * lags + intercept)
+    r2 = 1.0 - resid.var() / max(logk.var(), 1e-12)
     return float(np.exp(slope)), float(r2)
 
 
