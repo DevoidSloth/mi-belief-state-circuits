@@ -331,7 +331,7 @@ def belief_capture(
     device = next(sae.parameters()).device
     Xn = (A.to(device) - stats["mean"]) / stats["scale"]
     Fsae = sae.encode(Xn).cpu().numpy()
-    X = A.numpy().astype(np.float64)
+    X = A.cpu().numpy().astype(np.float64)
     Y = B.numpy().astype(np.float64)
 
     # restrict the greedy search to the most belief-correlated live features,
