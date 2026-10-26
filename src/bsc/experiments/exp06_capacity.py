@@ -37,7 +37,10 @@ from ..utils import RESULTS_DIR, environment_stamp, save_json
 from .common import best_probe, figure_path, train_cached
 
 CAPACITY_PROCESSES = ("mess3_hard", "sns", "random_non")
-WIDTHS = (4, 8, 12, 16, 24, 32, 64)
+# The threshold sits near d_model = 4, so the sweep needs several points
+# *below* it -- with only one, the fallback diagnostics have nothing to
+# compare and every verdict comes out inconclusive.
+WIDTHS = (2, 3, 4, 6, 8, 12, 16, 24, 32, 64)
 
 
 @torch.no_grad()
@@ -219,8 +222,21 @@ def _describe_fallback(points: list[dict], threshold: int | None) -> dict:
         vals = [v for v in vals if v is not None]
         return float(np.median(vals)) if vals else None
 
+    def med_kl(group, order):
+        vals = [
+            next((o["residual_kl"] for o in p["markov"]["by_order"] if o["order"] == order), None)
+            for p in group
+        ]
+        vals = [v for v in vals if v is not None]
+        return float(np.median(vals)) if vals else None
+
     small_order = med(small, ("markov", "effective_order"))
     large_order = med(large, ("markov", "effective_order"))
+    # A continuous version of the same question: how much of the model's own
+    # predictive distribution a short context already explains. The integer
+    # effective order saturates, this does not.
+    small_kl1, large_kl1 = med_kl(small, 1), med_kl(large, 1)
+    small_kl2, large_kl2 = med_kl(small, 2), med_kl(large, 2)
     small_clusters = med(small, ("quantisation", "clusters_for_95pct"))
     large_clusters = med(large, ("quantisation", "clusters_for_95pct"))
     small_rank = med(small, ("effective_rank",))
@@ -245,8 +261,21 @@ def _describe_fallback(points: list[dict], threshold: int | None) -> dict:
         verdicts.append(
             f"low-rank projection (effective rank {small_rank:.2f} vs {large_rank:.2f})"
         )
+    if (
+        small_kl1 is not None
+        and large_kl1 is not None
+        and small_kl1 < 0.5 * large_kl1
+    ):
+        verdicts.append(
+            f"collapse toward a short-context table (a bigram explains the model's own "
+            f"predictions to within {small_kl1:.4f} nats below threshold vs {large_kl1:.4f} above)"
+        )
     return {
         "verdict": "; ".join(verdicts) if verdicts else "no single fallback dominates",
+        "median_bigram_residual_kl_below": small_kl1,
+        "median_bigram_residual_kl_above": large_kl1,
+        "median_trigram_residual_kl_below": small_kl2,
+        "median_trigram_residual_kl_above": large_kl2,
         "median_effective_order_below": small_order,
         "median_effective_order_above": large_order,
         "median_clusters_below": small_clusters,

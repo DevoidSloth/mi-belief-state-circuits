@@ -354,6 +354,8 @@ def _section_capacity(d) -> str:
                 _fmt(r["capacity_threshold_d_model"], 0),
                 _fmt(f.get("median_effective_order_below"), 1),
                 _fmt(f.get("median_effective_order_above"), 1),
+                _fmt(f.get("median_bigram_residual_kl_below"), 4),
+                _fmt(f.get("median_bigram_residual_kl_above"), 4),
                 _fmt(f.get("median_clusters_below"), 1),
                 _fmt(f.get("median_clusters_above"), 1),
                 _fmt(f.get("median_effective_rank_below"), 2),
@@ -361,7 +363,8 @@ def _section_capacity(d) -> str:
             ]
         )
     body = _table(
-        ["process", "threshold d_model", "eff. Markov order (below)", "(above)",
+        ["process", "threshold d_model", "eff. order (below)", "(above)",
+         "bigram residual KL (below)", "(above)",
          "clusters for 95% (below)", "(above)", "effective rank (below)", "(above)"],
         rows,
     )
