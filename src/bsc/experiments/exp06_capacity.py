@@ -92,9 +92,19 @@ def effective_markov_order(
         kl = float((pmf * (np.log(np.clip(pmf, 1e-12, None)) - np.log(approx))).sum(-1).mean())
         rows.append({"order": k, "residual_kl": kl})
     best = min(rows, key=lambda r: r["residual_kl"])
-    explained = next((r for r in rows if r["residual_kl"] < 0.002), best)
-    return {"by_order": rows, "effective_order": explained["order"],
-            "residual_kl_at_effective_order": explained["residual_kl"]}
+    hit = next((r for r in rows if r["residual_kl"] < 0.002), None)
+    chosen = hit or best
+    # Reporting the integer alone is misleading. A model whose predictions no
+    # finite context explains also lands on the largest order tried, so "order 5"
+    # can mean either "needs a long context" or "is not a Markov table at all".
+    # The flag and the residual separate those two cases.
+    return {
+        "by_order": rows,
+        "effective_order": chosen["order"],
+        "residual_kl_at_effective_order": chosen["residual_kl"],
+        "explained_by_finite_context": hit is not None,
+        "residual_kl_at_max_order": rows[-1]["residual_kl"],
+    }
 
 
 def belief_quantisation(model, eval_set, burn_in: int, max_clusters: int = 32,
@@ -237,6 +247,10 @@ def _describe_fallback(points: list[dict], threshold: int | None) -> dict:
     # effective order saturates, this does not.
     small_kl1, large_kl1 = med_kl(small, 1), med_kl(large, 1)
     small_kl2, large_kl2 = med_kl(small, 2), med_kl(large, 2)
+    small_explained = float(np.mean([p["markov"]["explained_by_finite_context"] for p in small]))
+    large_explained = float(np.mean([p["markov"]["explained_by_finite_context"] for p in large]))
+    small_klmax = med(small, ("markov", "residual_kl_at_max_order"))
+    large_klmax = med(large, ("markov", "residual_kl_at_max_order"))
     small_clusters = med(small, ("quantisation", "clusters_for_95pct"))
     large_clusters = med(large, ("quantisation", "clusters_for_95pct"))
     small_rank = med(small, ("effective_rank",))
@@ -270,8 +284,23 @@ def _describe_fallback(points: list[dict], threshold: int | None) -> dict:
             f"collapse toward a short-context table (a bigram explains the model's own "
             f"predictions to within {small_kl1:.4f} nats below threshold vs {large_kl1:.4f} above)"
         )
+    if (
+        small_klmax is not None
+        and large_klmax is not None
+        and small_klmax > max(4 * large_klmax, 0.002)
+    ):
+        verdicts.append(
+            f"none of the three: below threshold the model's own predictions are not reproduced "
+            f"by a table of any tested order (residual {small_klmax:.4f} nats at order 5, vs "
+            f"{large_klmax:.4f} above), so the degradation is not a finite-memory truncation, "
+            f"a quantisation, or a low-rank projection -- it is unstructured error"
+        )
     return {
         "verdict": "; ".join(verdicts) if verdicts else "no single fallback dominates",
+        "fraction_explained_by_finite_context_below": small_explained,
+        "fraction_explained_by_finite_context_above": large_explained,
+        "median_max_order_residual_kl_below": small_klmax,
+        "median_max_order_residual_kl_above": large_klmax,
         "median_bigram_residual_kl_below": small_kl1,
         "median_bigram_residual_kl_above": large_kl1,
         "median_trigram_residual_kl_below": small_kl2,
