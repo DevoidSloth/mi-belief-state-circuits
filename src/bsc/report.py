@@ -51,6 +51,16 @@ def _table(headers: list[str], rows: list[list]) -> str:
     return "\n".join(lines)
 
 
+BUDGET_CAVEAT = (
+    "> **Every model here gets the same step budget**, so larger ones are further from "
+    "convergence and their gaps are training-limited rather than capacity-limited. That is why "
+    "the gap *rises* with width above the threshold. Read a capacity threshold as "
+    '"the width below which this budget cannot reach the optimum", not as an architectural '
+    "limit — and read a smallest-sufficient configuration as a statement about sample "
+    "efficiency rather than about representational capacity.\n"
+)
+
+
 def _section_optimality(d) -> str:
     if not d:
         return "_not run_\n"
@@ -376,7 +386,16 @@ def _section_capacity(d) -> str:
     )
     return (
         body
-        + "\n\nThreshold is the largest `d_model` whose optimality gap still exceeds "
+        + "\n\n"
+        + BUDGET_CAVEAT
+        + "\n- The *residual KL* columns say how well the model's own predictive distributions "
+        "are reproduced by a table indexed on the last k observations. They matter because the "
+        "effective-order integer alone is ambiguous: a model that genuinely needs a long context "
+        "and a model that *no* finite table describes both land on the largest order tried. A "
+        "small order-5 residual means the model really is a finite-memory approximation; a large "
+        "one means the degradation is unstructured error rather than any of the three "
+        "hypothesised fallbacks.\n"
+        + "\nThreshold is the largest `d_model` whose optimality gap still exceeds "
         f"{d['rows'][0]['criterion_nats']} nats/token. What replaces exact belief tracking below "
         "it:\n\n" + verdicts + "\n"
     )
@@ -460,6 +479,8 @@ def _section_architecture(d) -> str:
     return (
         "**Optimality gap by depth and width** (nats/token):\n\n"
         + body
+        + "\n\n"
+        + BUDGET_CAVEAT
         + note
         + "\n**Context length.** For a mixing process the optimal loss plateaus at the entropy "
         "rate and extra context is worthless past the mixing time. For a non-mixing one the "
