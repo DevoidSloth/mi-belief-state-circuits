@@ -176,17 +176,27 @@ def sae_metrics(
     from ..model.heads import head_logprob
 
     device = eval_set.obs.device
+    # Reconstruction quality is scored on the positions the SAE was trained on.
+    # Scoring the burn-in positions too makes the number meaningless: the first
+    # few residual streams are far off the distribution the dictionary saw, and
+    # their error can exceed the total variance, giving a negative "variance
+    # explained" on a dictionary that is fine everywhere it was fitted.
+    scored = acts[:, burn_in:].reshape(-1, acts.shape[-1]).float().to(device)
+    Xs = (scored - stats["mean"]) / stats["scale"]
+    recon_s, fs = sae(Xs)
+    recon_scored = recon_s * stats["scale"] + stats["mean"]
+
+    l0 = float((fs > 0).sum(-1).float().mean())
+    resid = ((scored - recon_scored) ** 2).sum()
+    total = ((scored - scored.mean(0, keepdim=True)) ** 2).sum()
+    var_explained = float(1.0 - resid / total.clamp_min(1e-12))
+    dead = float((fs > 0).float().sum(0).eq(0).float().mean())
+
+    # the spliced tensor still needs every position, since the model runs on all
     X = acts.reshape(-1, acts.shape[-1]).float().to(device)
     Xn = (X - stats["mean"]) / stats["scale"]
-    recon_n, f = sae(Xn)
+    recon_n, _ = sae(Xn)
     recon = recon_n * stats["scale"] + stats["mean"]
-
-    l0 = float((f > 0).sum(-1).float().mean())
-    resid = ((X - recon) ** 2).sum()
-    total = ((X - X.mean(0, keepdim=True)) ** 2).sum()
-    var_explained = float(1.0 - resid / total.clamp_min(1e-12))
-    dead = float((f > 0).float().sum(0).eq(0).float().mean())
-
     full = recon.reshape(acts.shape).to(device)
 
     def loss_of(params):

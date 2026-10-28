@@ -31,7 +31,10 @@ from ..utils import RESULTS_DIR, environment_stamp, save_json
 from .common import best_probe, figure_path, train_cached
 
 SAE_PROCESSES = ("mess3_hard", "mess3", "sns", "random_non", "regimevol")
-L1_GRID = (1e-3, 3e-3, 1e-2, 3e-2)
+# The MSE term is summed over d_model, so it is O(d_model) while the L1 term
+# is O(L0 * typical activation). Coefficients below ~0.1 therefore do not
+# sparsify at all at these widths -- the earlier grid left L0 above 100.
+L1_GRID = (0.03, 0.1, 0.3, 1.0, 3.0)
 
 
 def _plot_capture(rows: list[dict], path):
@@ -106,11 +109,18 @@ def run(
             del sae
             torch.cuda.empty_cache()
 
-        # pick the variant closest to the conventional healthy operating point
-        healthy = [v for v in variants if 10 <= v["metrics"]["l0"] <= 60]
-        best = max(
-            healthy or variants, key=lambda v: v["metrics"]["loss_recovered"]
-        )
+        # Pick the variant at the conventional healthy operating point (L0 in
+        # 10-60); if the grid never gets there, take the closest and say so,
+        # rather than silently reporting a dictionary that is barely sparse.
+        lo, hi = 10.0, 60.0
+        healthy = [v for v in variants if lo <= v["metrics"]["l0"] <= hi]
+        if healthy:
+            best = max(healthy, key=lambda v: v["metrics"]["loss_recovered"])
+        else:
+            best = min(
+                variants,
+                key=lambda v: min(abs(v["metrics"]["l0"] - lo), abs(v["metrics"]["l0"] - hi)),
+            )
         rows.append(
             {
                 "process": name,
@@ -119,6 +129,8 @@ def run(
                 "d_belief": out["process"].d_belief,
                 "variants": variants,
                 "best": best,
+                "reached_healthy_l0_band": bool(healthy),
+                "l0_band": [lo, hi],
             }
         )
 
@@ -158,6 +170,7 @@ def summarise(rows: list[dict]) -> dict:
             "sae_minus_rrr": c["sae_r2"] - c["rrr_r2"],
             "full_linear_r2": best["capture"]["full_linear_r2"],
             "n_live_features": best["capture"]["n_live_features"],
+            "reached_healthy_l0_band": row["reached_healthy_l0_band"],
         }
     gaps = [v["sae_minus_pca"] for v in out.values()]
     out["_aggregate"] = {

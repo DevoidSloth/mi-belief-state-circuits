@@ -324,7 +324,7 @@ def _section_sae(d) -> str:
         rows.append(
             [
                 name,
-                f"{s['l0']:.1f}",
+                f"{s['l0']:.1f}" + ("" if s.get("reached_healthy_l0_band", True) else " (!)"),
                 _fmt(s["variance_explained"], 3),
                 _fmt(s["loss_recovered"], 3),
                 s["k"],

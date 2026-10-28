@@ -69,10 +69,10 @@
         1.3508713875294743e-06
       ],
       "kernel_cosine": 0.9998578935978039,
-      "kernel_decay_rate": 0.5077656835152873,
+      "kernel_decay_rate": 0.534406489638743,
       "analytic_decay_rate": 0.5314250714018472,
-      "decay_rate_rel_error": 0.0445206467661543,
-      "kernel_fit_r2": 0.9935234481594521,
+      "decay_rate_rel_error": 0.005610232556456369,
+      "kernel_fit_r2": 0.9994557752360139,
       "gain_at_lag0": 0.4255097731947899,
       "analytic_gain_at_lag0": 0.41857492859815265,
       "head_obs_gains": {
@@ -189,10 +189,10 @@
         1.3508713875294743e-06
       ],
       "kernel_cosine": 0.9999598081903078,
-      "kernel_decay_rate": 0.49207293303241145,
+      "kernel_decay_rate": 0.5362761886926878,
       "analytic_decay_rate": 0.5314250714018472,
-      "decay_rate_rel_error": 0.07405021043818785,
-      "kernel_fit_r2": 0.9755694814524308,
+      "decay_rate_rel_error": 0.009128506636022576,
+      "kernel_fit_r2": 0.999842025657404,
       "gain_at_lag0": 0.41472800076007843,
       "analytic_gain_at_lag0": 0.41857492859815265,
       "head_obs_gains": {
@@ -278,10 +278,10 @@
         1.3508713875294743e-06
       ],
       "kernel_cosine": 0.9999098502664385,
-      "kernel_decay_rate": 0.5056715277085064,
+      "kernel_decay_rate": 0.5370272203518456,
       "analytic_decay_rate": 0.5314250714018472,
-      "decay_rate_rel_error": 0.048461288484951404,
-      "kernel_fit_r2": 0.9936198621034603,
+      "decay_rate_rel_error": 0.010541747560423545,
+      "kernel_fit_r2": 0.9999226578246557,
       "gain_at_lag0": 0.4115350767970085,
       "analytic_gain_at_lag0": 0.41857492859815265,
       "head_obs_gains": {
@@ -367,10 +367,10 @@
         1.3508713875294743e-06
       ],
       "kernel_cosine": 0.9998623984361074,
-      "kernel_decay_rate": 0.515985331875921,
+      "kernel_decay_rate": 0.5348055587029135,
       "analytic_decay_rate": 0.5314250714018472,
-      "decay_rate_rel_error": 0.02905346464967815,
-      "kernel_fit_r2": 0.9953131406417102,
+      "decay_rate_rel_error": 0.00636117391328343,
+      "kernel_fit_r2": 0.9997886041036395,
       "gain_at_lag0": 0.4259587377309799,
       "analytic_gain_at_lag0": 0.41857492859815265,
       "head_obs_gains": {
@@ -456,10 +456,10 @@
         1.3508713875294743e-06
       ],
       "kernel_cosine": 0.9999883557500535,
-      "kernel_decay_rate": 0.49128059441434424,
+      "kernel_decay_rate": 0.5338504068100247,
       "analytic_decay_rate": 0.5314250714018472,
-      "decay_rate_rel_error": 0.07554118002300082,
-      "kernel_fit_r2": 0.9828406165898507,
+      "decay_rate_rel_error": 0.004563833245164116,
+      "kernel_fit_r2": 0.9998694295832311,
       "gain_at_lag0": 0.41951920092105865,
       "analytic_gain_at_lag0": 0.41857492859815265,
       "head_obs_gains": {
@@ -1012,7 +1012,7 @@
     }
   ],
   "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp04_kalman_kernel.png",
-  "wall_time_s": 314.06779289245605,
+  "wall_time_s": 5.536642789840698,
   "environment": {
     "python": "3.14.0",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -1020,14 +1020,14 @@
     "numpy": "2.2.6",
     "cuda_available": true,
     "device_name": "NVIDIA GeForce RTX 4080 Laptop GPU",
-    "git_commit": "83e2174"
+    "git_commit": "1ad7dfc"
   },
   "summary": {
     "kalman": {
       "n_seeds": 5,
       "kernel_cosine_mean": 0.9999156612481424,
       "kernel_cosine_min": 0.9998578935978039,
-      "decay_rate_rel_error_mean": 0.054325358072394504,
+      "decay_rate_rel_error_mean": 0.007241098782270007,
       "recursion_alpha_rel_error_mean": 0.0021864168747121686,
       "recursion_beta_rel_error_mean": 0.0018417226595466123,
       "analytic": {
