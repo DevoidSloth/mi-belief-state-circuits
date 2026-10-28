@@ -172,10 +172,19 @@ def run(
             "loss_curve_oracle": oracle_curve.tolist(),
             "best_single_component_loss": float(min(per_component)),
             "per_component_fixed_filter_loss": per_component,
-            "early_loss_model": float(model_curve[burn_in : burn_in + 16].mean()),
+            # "Early" must mean *before* the model has had context to work with,
+            # so it starts at position 1, not after the burn-in used for scoring.
+            # Measuring from position 16 starts after the fall has already
+            # happened and reports an in-context gain of roughly zero.
+            # Position 0 is excluded: it has seen nothing at all, so it measures
+            # how well the prior was learned rather than what context buys.
+            "early_window": [1, 9],
+            "early_loss_model": float(model_curve[1:9].mean()),
             "late_loss_model": float(model_curve[-32:].mean()),
-            "early_loss_oracle": float(oracle_curve[burn_in : burn_in + 16].mean()),
+            "early_loss_oracle": float(oracle_curve[1:9].mean()),
             "late_loss_oracle": float(oracle_curve[-32:].mean()),
+            "position0_loss_model": float(model_curve[0]),
+            "position0_loss_oracle": float(oracle_curve[0]),
             "component_probe_hook": hook,
             "component_probe_r2": probe.r2,
             "identification": _component_identification(model, eval_set, probe, hook, burn_in),

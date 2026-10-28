@@ -80,6 +80,9 @@ def _context(seed: int, verbose: bool) -> list[dict]:
             oracle_curve = np.array(f.oracle_per_position)
             burn_in = out["train_cfg"].burn_in
             tail = max(burn_in + 1, len(model_curve) - 16)
+            # Early means before context has accumulated. Starting the window at
+            # the scoring burn-in would begin after the fall and report no gain.
+            early = slice(1, 9)
             rows.append(
                 {
                     "process": name,
@@ -88,9 +91,9 @@ def _context(seed: int, verbose: bool) -> list[dict]:
                     "gap_stderr": f.gap_stderr,
                     "loss_curve_model": model_curve.tolist(),
                     "loss_curve_oracle": oracle_curve.tolist(),
-                    "oracle_early": float(oracle_curve[burn_in : burn_in + 8].mean()),
+                    "oracle_early": float(oracle_curve[early].mean()),
                     "oracle_late": float(oracle_curve[tail:].mean()),
-                    "model_early": float(model_curve[burn_in : burn_in + 8].mean()),
+                    "model_early": float(model_curve[early].mean()),
                     "model_late": float(model_curve[tail:].mean()),
                 }
             )
