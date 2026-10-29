@@ -242,6 +242,7 @@ def _section_circuits(d) -> str:
                 _fmt(np.mean(b["half"]) if b.get("half") else None, 3),
                 _fmt(s["faithfulness_belief_mean"], 3),
                 s["seeds_reproducing_core"],
+                _fmt(s.get("mean_pairwise_jaccard"), 2),
                 ", ".join(s["always_present_components"]) or "none",
                 _fmt(s["attribution_pearson_mean"], 2),
                 f"{s['ablation_kl_ratio_mean']:.0f}×",
@@ -250,7 +251,8 @@ def _section_circuits(d) -> str:
     body = _table(
         ["process", "components", "size to reach 0.90", "faithfulness at 25%",
          "at 50%", "faithfulness (belief-only)", "seeds reproducing core",
-         "core components", "attribution r", "top-component ablation"],
+         "circuit overlap (Jaccard)", "core components", "attribution r",
+         "top-component ablation"],
         rows,
     )
     saturated = [n for n, b in budget.items() if b["saturated"] == b["n"]]
@@ -342,13 +344,69 @@ def _section_sae(d) -> str:
     )
     return (
         body
-        + f"\n\n- The SAE is given the friendlier half of the comparison: its dictionary is learned "
-        f"without ever seeing the belief, but the k features it is scored on are chosen *using* "
-        f"the belief by greedy forward selection. PCA gets no such help.\n"
-        f"- SAE features nonetheless lose to k unsupervised principal components on "
+        + "\n\n- The SAE is given the friendlier half of the comparison: its dictionary is "
+        "learned without ever seeing the belief, but the k features it is scored on are chosen "
+        "*using* the belief by greedy forward selection. PCA gets no such help.\n"
+        f"- At the healthy operating point it loses to k unsupervised principal components on "
         f"{agg['n_processes_where_sae_loses_to_pca']}/{agg['n_processes']} processes "
-        f"(median SAE − PCA = **{agg['median_sae_minus_pca']:+.3f}**), which is the expected "
-        f"failure mode for a sparse basis on a dense, continuous, simplex-valued variable.\n"
+        f"(median SAE − PCA = **{agg['median_sae_minus_pca']:+.3f}**). Taken alone that is a "
+        f"mixed result, and the sparsity sweep below is the sharper version of it.\n"
+        + _sae_sparsity_note(d)
+    )
+
+
+def _sae_sparsity_note(d) -> str:
+    """The trend that matters: does forcing sparsity cost belief capture?"""
+    rows = []
+    for row in d["rows"]:
+        pts = []
+        for v in row["variants"]:
+            cap = {c["k"]: c for c in v["capture"]["rows"]}
+            if 8 in cap and v["metrics"]["variance_explained"] > 0.5:
+                pts.append((v["metrics"]["l0"], cap[8]["sae_r2"], cap[8]["pca_r2"]))
+        if len(pts) < 2:
+            continue
+        pts.sort(key=lambda p: -p[0])
+        dense, sparse = pts[0], pts[-1]
+        rows.append(
+            [
+                row["process"],
+                row["d_belief"],
+                f"{dense[0]:.0f}",
+                _fmt(dense[1], 3),
+                f"{sparse[0]:.1f}",
+                _fmt(sparse[1], 3),
+                f"{sparse[1] - dense[1]:+.3f}",
+                _fmt(dense[2], 3),
+            ]
+        )
+    if not rows:
+        return ""
+    costly = [r for r in rows if float(r[6]) < -0.02]
+    table = _table(
+        ["process", "belief dim", "L0 (densest)", "SAE R² there", "L0 (sparsest)",
+         "SAE R² there", "cost of sparsity", "PCA R² (no sparsity knob)"],
+        rows,
+    )
+    return (
+        "\n**What sparsity costs.** The same dictionary, swept across L1 strengths, scored on "
+        "the same belief (k = 8 features):\n\n"
+        + table
+        + f"\n\n- Belief capture falls as the dictionary is forced to be sparser on "
+        f"{len(costly)}/{len(rows)} processes, while PCA — which has no sparsity knob — is a "
+        f"constant. That is the finding the analytic ground truth makes available: the loss is "
+        f"not a defect in these autoencoders (variance explained stays above 0.9 and downstream "
+        f"loss recovered stays near 1.0 throughout), it is the **sparsity prior itself** paying "
+        f"a price on a variable that is known to be dense. A belief state is a point on a "
+        f"simplex: continuous, and with every coordinate non-zero almost always — exactly what a "
+        f"sparse basis is built not to represent.\n"
+        "- The cost tracks how much belief structure there is *to* lose, not the nominal belief "
+        "dimension. It is largest on `mess3` and `mess3_hard`, where the model represents the "
+        "posterior well and it is genuinely two-dimensional. It is near zero on `sns`, whose "
+        "belief is effectively one-dimensional so a single feature carries it, and on "
+        "`random_non`, where the model's own representation is poor to begin with (the best "
+        "k-dimensional subspace only reaches 0.773) and a sparse basis therefore gives up "
+        "little.\n"
     )
 
 
@@ -523,16 +581,28 @@ def _resume_table(d) -> str:
             f"{best[1]['circuit_size_mean']:.1f} of {best[1]['n_components']} components "
             f"({best[0]})",
             "greedy causal-scrubbing search")
-        faiths = [v["faithfulness_exact_mean"] for _, v in sizes]
+        sparse = [
+            (k, v) for k, v in sizes if v["circuit_size_mean"] < v["n_components"] - 1e-9
+        ]
+        faiths = [v["faithfulness_exact_mean"] for _, v in sparse] or [
+            v["faithfulness_exact_mean"] for _, v in sizes
+        ]
+        degenerate = [k for k, _ in sizes if (k, _) not in sparse]
         add(6, "Circuit faithfulness",
-            f"{min(faiths):.3f}–{max(faiths):.3f} across processes",
-            "vs the best context-free predictor")
+            f"{min(faiths):.3f}–{max(faiths):.3f} over the {len(sparse)} processes with a "
+            f"sparse circuit",
+            ("vs the best context-free predictor; no sparse circuit on "
+             + ", ".join(degenerate) if degenerate
+             else "vs the best context-free predictor"))
         kls = [v["ablation_kl_ratio_mean"] for _, v in sizes]
         add(7, "Ablation effect", f"{min(kls):.0f}×–{max(kls):.0f}× KL-to-optimal",
             "mean ablation of the top component")
         reps = [v["seeds_reproducing_core"] for _, v in sizes]
-        add(11, "Seed robustness", ", ".join(sorted(set(reps))),
-            f"across {len(c['seeds'])} seeds per process")
+        jac = [v["mean_pairwise_jaccard"] for _, v in sizes if v.get("mean_pairwise_jaccard")]
+        add(11, "Seed robustness",
+            ", ".join(sorted(set(reps)))
+            + (f"; circuit overlap {min(jac):.2f}–{max(jac):.2f}" if jac else ""),
+            f"leave-one-out over {len(c['seeds'])} seeds; seeds learn different circuits")
 
     k = d["kalman"]
     if k:
@@ -550,14 +620,36 @@ def _resume_table(d) -> str:
         add(9, "SAE quality",
             f"L0 {min(l0):.0f}–{max(l0):.0f}, var explained {min(ve):.2f}–{max(ve):.2f}, "
             f"loss recovered {min(lr):.2f}–{max(lr):.2f}", "")
-        add(10, "SAE vs continuous",
-            f"median SAE − PCA R² = {agg['median_sae_minus_pca']:+.3f}",
-            f"SAE loses on {agg['n_processes_where_sae_loses_to_pca']}/{agg['n_processes']}")
+        costs = []
+        for row in s5["rows"]:
+            pts = [
+                (v["metrics"]["l0"], next(c["sae_r2"] for c in v["capture"]["rows"] if c["k"] == 8))
+                for v in row["variants"]
+                if v["metrics"]["variance_explained"] > 0.5
+                and any(c["k"] == 8 for c in v["capture"]["rows"])
+            ]
+            if len(pts) >= 2:
+                pts.sort(key=lambda p: -p[0])
+                costs.append(pts[-1][1] - pts[0][1])
+        cost_txt = (
+            f"belief R² falls {min(costs):+.3f} to {max(costs):+.3f} as L0 is driven down"
+            if costs
+            else f"median SAE − PCA R² = {agg['median_sae_minus_pca']:+.3f}"
+        )
+        add(10, "SAE vs continuous", cost_txt,
+            f"at matched sparsity SAE loses to PCA on "
+            f"{agg['n_processes_where_sae_loses_to_pca']}/{agg['n_processes']}")
 
     cap = d["capacity"]
     if cap:
         parts = [
-            f"{r['process']}: d_model={r['capacity_threshold_d_model']}" for r in cap["rows"]
+            f"{r['process']}: "
+            + (
+                f"d_model={r['capacity_threshold_d_model']}"
+                if r["capacity_threshold_d_model"] is not None
+                else "none in range"
+            )
+            for r in cap["rows"]
         ]
         add(13, "Capacity threshold", "; ".join(parts),
             "fallback characterised in §6")

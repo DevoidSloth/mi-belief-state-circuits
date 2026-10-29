@@ -156,8 +156,22 @@ def summarise(rows: list[dict], seeds) -> dict:
         faith_b = np.array([r["faithfulness_belief"]["faithfulness"] for r in group])
         counts = Counter(c for r in group for c in r["circuit"])
         modal = [c for c, n in counts.items() if n == len(group)]
-        # a seed "reproduces" the modal circuit if it contains every always-present component
-        reproduced = sum(1 for r in group if set(modal).issubset(set(r["circuit"])))
+        # Leave-one-out, because "does every seed contain the components present in
+        # every seed?" is true by construction and answers nothing. Define the core
+        # from the *other* seeds, then ask whether the held-out seed contains it.
+        reproduced = 0
+        for i, r in enumerate(group):
+            others = [g for j, g in enumerate(group) if j != i]
+            core = set.intersection(*(set(o["circuit"]) for o in others)) if others else set()
+            if core and core.issubset(set(r["circuit"])):
+                reproduced += 1
+        # and a measure that does not depend on a threshold at all
+        jaccards = []
+        for i in range(len(group)):
+            for j in range(i + 1, len(group)):
+                a, b = set(group[i]["circuit"]), set(group[j]["circuit"])
+                if a | b:
+                    jaccards.append(len(a & b) / len(a | b))
         out[name] = {
             "n_seeds": len(group),
             "n_components": group[0]["n_components"],
@@ -170,6 +184,7 @@ def summarise(rows: list[dict], seeds) -> dict:
             "always_present_components": sorted(modal),
             "component_frequency": dict(counts),
             "seeds_reproducing_core": f"{reproduced}/{len(group)}",
+            "mean_pairwise_jaccard": float(np.mean(jaccards)) if jaccards else None,
             "attribution_pearson_mean": float(
                 np.nanmean([r["attribution_fidelity"]["pearson_r"] for r in group])
             ),

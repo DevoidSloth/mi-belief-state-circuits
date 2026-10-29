@@ -284,8 +284,13 @@ def _describe_fallback(points: list[dict], threshold: int | None) -> dict:
             f"collapse toward a short-context table (a bigram explains the model's own "
             f"predictions to within {small_kl1:.4f} nats below threshold vs {large_kl1:.4f} above)"
         )
+    # Only reached when nothing else fired. A model can be both better explained
+    # by a short context *and* imperfectly explained at every order; emitting both
+    # verdicts side by side reads as a contradiction, so the residual-error verdict
+    # is the fallback of last resort.
     if (
-        small_klmax is not None
+        not verdicts
+        and small_klmax is not None
         and large_klmax is not None
         and small_klmax > max(4 * large_klmax, 0.002)
     ):

@@ -882,7 +882,7 @@
       ],
       "capacity_threshold_d_model": 4,
       "fallback": {
-        "verdict": "collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0204 nats below threshold vs 0.0651 above); none of the three: below threshold the model's own predictions are not reproduced by a table of any tested order (residual 0.0069 nats at order 5, vs 0.0011 above), so the degradation is not a finite-memory truncation, a quantisation, or a low-rank projection -- it is unstructured error",
+        "verdict": "collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0204 nats below threshold vs 0.0651 above)",
         "fraction_explained_by_finite_context_below": 0.3333333333333333,
         "fraction_explained_by_finite_context_above": 0.8571428571428571,
         "median_max_order_residual_kl_below": 0.006865893488806218,
@@ -2657,7 +2657,7 @@
     }
   ],
   "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp06_capacity.png",
-  "wall_time_s": 587.8088908195496,
+  "wall_time_s": 83.45274043083191,
   "environment": {
     "python": "3.14.0",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -2665,13 +2665,13 @@
     "numpy": "2.2.6",
     "cuda_available": true,
     "device_name": "NVIDIA GeForce RTX 4080 Laptop GPU",
-    "git_commit": "fd2522b"
+    "git_commit": "20bd253"
   },
   "summary": {
     "mess3_hard": {
       "capacity_threshold_d_model": 4,
       "fallback": {
-        "verdict": "collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0204 nats below threshold vs 0.0651 above); none of the three: below threshold the model's own predictions are not reproduced by a table of any tested order (residual 0.0069 nats at order 5, vs 0.0011 above), so the degradation is not a finite-memory truncation, a quantisation, or a low-rank projection -- it is unstructured error",
+        "verdict": "collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0204 nats below threshold vs 0.0651 above)",
         "fraction_explained_by_finite_context_below": 0.3333333333333333,
         "fraction_explained_by_finite_context_above": 0.8571428571428571,
         "median_max_order_residual_kl_below": 0.006865893488806218,

@@ -1492,7 +1492,7 @@
     }
   ],
   "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp07_incontext.png",
-  "wall_time_s": 14.996833324432373,
+  "wall_time_s": 13.937130212783813,
   "environment": {
     "python": "3.14.0",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -1500,7 +1500,7 @@
     "numpy": "2.2.6",
     "cuda_available": true,
     "device_name": "NVIDIA GeForce RTX 4080 Laptop GPU",
-    "git_commit": "fd2522b"
+    "git_commit": "20bd253"
   },
   "summary": {
     "even_family": {
