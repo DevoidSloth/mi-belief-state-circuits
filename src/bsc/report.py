@@ -326,7 +326,7 @@ def _section_sae(d) -> str:
                 name,
                 f"{s['l0']:.1f}" + ("" if s.get("reached_healthy_l0_band", True) else " (!)"),
                 _fmt(s["variance_explained"], 3),
-                _fmt(s["loss_recovered"], 3),
+                (_fmt(s["loss_recovered"], 3) if s.get("ablation_effect", 1.0) > 0.02 else "n/a"),
                 s["k"],
                 _fmt(s["sae_r2_at_k"], 3),
                 _fmt(s["pca_r2_at_k"], 3),

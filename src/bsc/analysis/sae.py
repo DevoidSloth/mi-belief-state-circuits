@@ -39,7 +39,15 @@ class SAEConfig:
     lr: float = 1e-3
     steps: int = 4000
     batch_size: int = 4096
-    resample_every: int = 1000
+    #: Dead-feature resampling, off by default. It is a training convenience, not
+    #: part of any claim here, and in this setup it destabilises training rather
+    #: than helping: reintroducing ~135 features at once took variance explained
+    #: from 0.998 to -106 in a single step and the run never recovered. Scaling
+    #: the new encoder columns to the surviving features' norm and resetting the
+    #: optimiser state both help and neither fixes it, so it is disabled and the
+    #: cost is reported instead -- ``dead_fraction`` says how many features never
+    #: fire. Set a positive value to re-enable.
+    resample_every: int = 0
     dead_threshold: int = 200
     seed: int = 0
     normalise_input: bool = True
@@ -93,6 +101,8 @@ class SAEMetrics:
     loss_model: float
     loss_with_sae: float
     loss_ablated: float
+    #: loss_ablated - loss_model: the denominator behind ``loss_recovered``
+    ablation_effect: float
     d_sae: int
     l1_coeff: float
     extra: dict = field(default_factory=dict)
@@ -132,7 +142,7 @@ def train_sae(acts: torch.Tensor, cfg: SAEConfig, device=None, verbose: bool = F
             sae.fire_count += (f > 0).sum(0).float()
 
         if cfg.resample_every and (step + 1) % cfg.resample_every == 0:
-            _resample_dead(sae, Xn, cfg, gen, device)
+            _resample_dead(sae, Xn, cfg, gen, device, opt)
             sae.fire_count.zero_()
         if verbose and step % max(1, cfg.steps // 5) == 0:
             with torch.no_grad():
@@ -143,8 +153,16 @@ def train_sae(acts: torch.Tensor, cfg: SAEConfig, device=None, verbose: bool = F
 
 
 @torch.no_grad()
-def _resample_dead(sae: SAE, X: torch.Tensor, cfg: SAEConfig, gen, device) -> int:
-    """Re-initialise features that never fire, aimed at the worst-reconstructed inputs."""
+def _resample_dead(sae: SAE, X: torch.Tensor, cfg: SAEConfig, gen, device, opt=None) -> int:
+    """Re-initialise features that never fire, aimed at the worst-reconstructed inputs.
+
+    ``opt`` must be passed. Rewriting a slice of a parameter in place leaves
+    Adam's moment estimates for that slice describing the *old* feature, and the
+    next step then applies a large stale update to a freshly initialised
+    direction. Left unreset this diverges: on ``sns`` the reconstruction norm
+    grew from 1.4e3 to 3.4e4 over 4000 steps and variance explained fell to
+    -535, while the same run with resampling disabled sat at 0.999.
+    """
     dead = (sae.fire_count < cfg.dead_threshold).nonzero(as_tuple=True)[0]
     if len(dead) == 0:
         return 0
@@ -156,9 +174,35 @@ def _resample_dead(sae: SAE, X: torch.Tensor, cfg: SAEConfig, gen, device) -> in
     pick = torch.multinomial(probs, len(dead), replacement=True)
     directions = sample[pick] - sae.b_dec
     directions = directions / directions.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+    # Scale the new encoder columns to a fraction of the *surviving* features'
+    # norm, and inherit their bias. Writing unit-norm directions with a zero bias
+    # instead makes every resampled feature fire on roughly half the dataset at
+    # full magnitude: 135 of them appearing at once took variance explained from
+    # 0.998 to -106 in a single step, and the run never recovered.
+    alive = torch.ones(sae.cfg.d_sae, dtype=torch.bool, device=dead.device)
+    alive[dead] = False
+    if alive.any():
+        alive_norm = sae.W_enc.data[:, alive].norm(dim=0).mean()
+        alive_bias = sae.b_enc.data[alive].mean()
+    else:
+        alive_norm = sae.W_enc.data.norm(dim=0).mean()
+        alive_bias = sae.b_enc.data.mean()
+
     sae.W_dec.data[dead] = directions
-    sae.W_enc.data[:, dead] = directions.T * 0.2
-    sae.b_enc.data[dead] = 0.0
+    sae.W_enc.data[:, dead] = directions.T * (0.2 * alive_norm)
+    sae.b_enc.data[dead] = alive_bias
+
+    if opt is not None:
+        for param, index in (
+            (sae.W_dec, (dead,)),
+            (sae.b_enc, (dead,)),
+            (sae.W_enc, (slice(None), dead)),
+        ):
+            state = opt.state.get(param)
+            if state:
+                for key in ("exp_avg", "exp_avg_sq"):
+                    if key in state:
+                        state[key][index] = 0.0
     return len(dead)
 
 
@@ -223,6 +267,10 @@ def sae_metrics(
     with model.hooks([(hook, ablate)]):
         ablated = loss_of(model(eval_set.obs))
 
+    # loss_recovered divides by how much mean-ablating this site hurts. Where the
+    # site barely matters that denominator is near zero and the ratio is
+    # meaningless (it reached 4.8 on random_non), so the denominator is reported
+    # alongside it rather than left implicit.
     denom = ablated - base
     return SAEMetrics(
         l0=l0,
@@ -232,6 +280,7 @@ def sae_metrics(
         loss_model=base,
         loss_with_sae=with_sae,
         loss_ablated=ablated,
+        ablation_effect=denom,
         d_sae=sae.cfg.d_sae,
         l1_coeff=sae.cfg.l1_coeff,
         extra={"hook": hook},

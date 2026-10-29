@@ -401,10 +401,16 @@
         0.4713661502209097,
         0.5963029535049192
       ],
-      "early_loss_model": 0.3985893428325653,
+      "early_window": [
+        1,
+        9
+      ],
+      "early_loss_model": 0.5718713998794556,
       "late_loss_model": 0.3837897777557373,
-      "early_loss_oracle": 0.39696699380874634,
+      "early_loss_oracle": 0.4695662260055542,
       "late_loss_oracle": 0.38289815187454224,
+      "position0_loss_model": 0.9333158731460571,
+      "position0_loss_oracle": 0.6512453556060791,
       "component_probe_hook": "blocks.3.hook_resid_post",
       "component_probe_r2": 0.9750394423466759,
       "identification": {
@@ -486,8 +492,8 @@
           "gap_to_family_oracle": 0.002526174941448689
         }
       ],
-      "in_context_gain_model": 0.014799565076828003,
-      "in_context_gain_oracle": 0.014068841934204102
+      "in_context_gain_model": 0.18808162212371826,
+      "in_context_gain_oracle": 0.08666807413101196
     },
     {
       "family": "golden_family",
@@ -889,10 +895,16 @@
         0.4885121823882738,
         0.7453812721702779
       ],
-      "early_loss_model": 0.3683702051639557,
+      "early_window": [
+        1,
+        9
+      ],
+      "early_loss_model": 0.4644545018672943,
       "late_loss_model": 0.35514912009239197,
-      "early_loss_oracle": 0.3654918968677521,
+      "early_loss_oracle": 0.4184580445289612,
       "late_loss_oracle": 0.3537448048591614,
+      "position0_loss_model": 0.8262405395507812,
+      "position0_loss_oracle": 0.6352465748786926,
       "component_probe_hook": "blocks.3.hook_resid_post",
       "component_probe_r2": 0.9534748371189881,
       "identification": {
@@ -982,8 +994,8 @@
           "gap_to_family_oracle": -0.001592561233540124
         }
       ],
-      "in_context_gain_model": 0.01322108507156372,
-      "in_context_gain_oracle": 0.011747092008590698
+      "in_context_gain_model": 0.10930538177490234,
+      "in_context_gain_oracle": 0.0647132396697998
     },
     {
       "family": "mess3_family",
@@ -1384,10 +1396,16 @@
         0.9213875172587145,
         1.0340751332826572
       ],
-      "early_loss_model": 0.8678872585296631,
+      "early_window": [
+        1,
+        9
+      ],
+      "early_loss_model": 0.9276270866394043,
       "late_loss_model": 0.8778468370437622,
-      "early_loss_oracle": 0.8646866083145142,
+      "early_loss_oracle": 0.9076278805732727,
       "late_loss_oracle": 0.8745335340499878,
+      "position0_loss_model": 1.202911376953125,
+      "position0_loss_oracle": 1.0986120700836182,
       "component_probe_hook": "blocks.3.hook_resid_post",
       "component_probe_r2": 0.9082506323360039,
       "identification": {
@@ -1469,12 +1487,12 @@
           "gap_to_family_oracle": 0.003594539382489881
         }
       ],
-      "in_context_gain_model": -0.009959578514099121,
-      "in_context_gain_oracle": -0.009846925735473633
+      "in_context_gain_model": 0.04978024959564209,
+      "in_context_gain_oracle": 0.03309434652328491
     }
   ],
   "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp07_incontext.png",
-  "wall_time_s": 485.65699672698975,
+  "wall_time_s": 14.996833324432373,
   "environment": {
     "python": "3.14.0",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -1482,14 +1500,14 @@
     "numpy": "2.2.6",
     "cuda_available": true,
     "device_name": "NVIDIA GeForce RTX 4080 Laptop GPU",
-    "git_commit": "3d8fbb5"
+    "git_commit": "fd2522b"
   },
   "summary": {
     "even_family": {
       "gap": 0.0006917691789567471,
-      "in_context_gain_model": 0.014799565076828003,
-      "in_context_gain_oracle": 0.014068841934204102,
-      "gain_ratio": 1.0519391109830705,
+      "in_context_gain_model": 0.18808162212371826,
+      "in_context_gain_oracle": 0.08666807413101196,
+      "gain_ratio": 2.1701373199940304,
       "component_probe_r2": 0.9750394423466759,
       "final_component_agreement": 0.9976917613636364,
       "held_out_mean_gap": 0.028726469725370407,
@@ -1497,9 +1515,9 @@
     },
     "golden_family": {
       "gap": 0.001673906110227108,
-      "in_context_gain_model": 0.01322108507156372,
-      "in_context_gain_oracle": 0.011747092008590698,
-      "gain_ratio": 1.1254772723236597,
+      "in_context_gain_model": 0.10930538177490234,
+      "in_context_gain_oracle": 0.0647132396697998,
+      "gain_ratio": 1.6890729367380548,
       "component_probe_r2": 0.9534748371189881,
       "final_component_agreement": 0.9923650568181818,
       "held_out_mean_gap": 0.025031764681140583,
@@ -1507,9 +1525,9 @@
     },
     "mess3_family": {
       "gap": 0.00303658633492887,
-      "in_context_gain_model": -0.009959578514099121,
-      "in_context_gain_oracle": -0.009846925735473633,
-      "gain_ratio": -9959578.514099121,
+      "in_context_gain_model": 0.04978024959564209,
+      "in_context_gain_oracle": 0.03309434652328491,
+      "gain_ratio": 1.5041919489365687,
       "component_probe_r2": 0.9082506323360039,
       "final_component_agreement": 0.9836647727272727,
       "held_out_mean_gap": 0.016856476664543152,

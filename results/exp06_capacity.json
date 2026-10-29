@@ -2,7 +2,10 @@
   "experiment": "exp06_capacity",
   "seed": 0,
   "widths": [
+    2,
+    3,
     4,
+    6,
     8,
     12,
     16,
@@ -16,6 +19,178 @@
       "oracle_loss": 0.7915712594985962,
       "criterion_nats": 0.02,
       "points": [
+        {
+          "d_model": 2,
+          "n_params": 509,
+          "gap": 0.17679473757743835,
+          "gap_stderr": 0.0035055994521826506,
+          "kl_to_optimal": 0.1760271042585373,
+          "probe_r2": 0.4112295576830659,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.12728483974933624
+              },
+              {
+                "order": 1,
+                "residual_kl": 2.309151014321475e-08
+              },
+              {
+                "order": 2,
+                "residual_kl": 2.309115881111445e-08
+              },
+              {
+                "order": 3,
+                "residual_kl": 2.3086081952355653e-08
+              },
+              {
+                "order": 4,
+                "residual_kl": 2.3076302884393405e-08
+              },
+              {
+                "order": 5,
+                "residual_kl": 2.3030794697324182e-08
+              }
+            ],
+            "effective_order": 1,
+            "residual_kl_at_effective_order": 2.309151014321475e-08,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 2.3030794697324182e-08
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.9999999403953552
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.9999999403953552
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.9999999403953552
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9999999403953552
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 1.0
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 1.0
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 1.0
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 1.0
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 1.0
+              }
+            ],
+            "clusters_for_95pct": 2
+          },
+          "effective_rank": 1.0000000000035025
+        },
+        {
+          "d_model": 3,
+          "n_params": 906,
+          "gap": 0.04458951950073242,
+          "gap_stderr": 0.001400727778673172,
+          "kl_to_optimal": 0.04412529990077019,
+          "probe_r2": 0.7604846854811436,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.2577279508113861
+              },
+              {
+                "order": 1,
+                "residual_kl": 0.020426465162930806
+              },
+              {
+                "order": 2,
+                "residual_kl": 0.014126019786089957
+              },
+              {
+                "order": 3,
+                "residual_kl": 0.010367405054366013
+              },
+              {
+                "order": 4,
+                "residual_kl": 0.008201384768400011
+              },
+              {
+                "order": 5,
+                "residual_kl": 0.006865893488806218
+              }
+            ],
+            "effective_order": 5,
+            "residual_kl_at_effective_order": 0.006865893488806218,
+            "explained_by_finite_context": false,
+            "residual_kl_at_max_order": 0.006865893488806218
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.47376400232315063
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.9410117864608765
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.9462478160858154
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9791932106018066
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.9877904057502747
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.9940479397773743
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.996284544467926
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.997719407081604
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.9986895322799683
+              }
+            ],
+            "clusters_for_95pct": 6
+          },
+          "effective_rank": 1.9923722716259358
+        },
         {
           "d_model": 4,
           "n_params": 1399,
@@ -51,7 +226,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.013202635572175849
+            "residual_kl_at_effective_order": 0.013202635572175849,
+            "explained_by_finite_context": false,
+            "residual_kl_at_max_order": 0.013202635572175849
           },
           "quantisation": {
             "by_clusters": [
@@ -101,6 +278,92 @@
           "effective_rank": 1.9988321332788523
         },
         {
+          "d_model": 6,
+          "n_params": 2673,
+          "gap": 0.0009121543262153864,
+          "gap_stderr": 0.00021975662093609571,
+          "kl_to_optimal": 0.0009750332683324814,
+          "probe_r2": 0.9796647083430517,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.30501049757003784
+              },
+              {
+                "order": 1,
+                "residual_kl": 0.06459887663579132
+              },
+              {
+                "order": 2,
+                "residual_kl": 0.020655264578200667
+              },
+              {
+                "order": 3,
+                "residual_kl": 0.005292715648635749
+              },
+              {
+                "order": 4,
+                "residual_kl": 0.0017992744497504856
+              },
+              {
+                "order": 5,
+                "residual_kl": 0.0008370009466247077
+              }
+            ],
+            "effective_order": 4,
+            "residual_kl_at_effective_order": 0.0017992744497504856,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0008370009466247077
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.4414396286010742
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.8831214904785156
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.9323179721832275
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9818127155303955
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.9866043925285339
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.9914212822914124
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.9947373867034912
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.9962120652198792
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.9971698522567749
+              }
+            ],
+            "clusters_for_95pct": 6
+          },
+          "effective_rank": 1.99987221947257
+        },
+        {
           "d_model": 8,
           "n_params": 4331,
           "gap": 0.0008829801226966083,
@@ -135,7 +398,9 @@
               }
             ],
             "effective_order": 4,
-            "residual_kl_at_effective_order": 0.0018412491897215587
+            "residual_kl_at_effective_order": 0.0018412491897215587,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0008513212384858177
           },
           "quantisation": {
             "by_clusters": [
@@ -219,7 +484,9 @@
               }
             ],
             "effective_order": 4,
-            "residual_kl_at_effective_order": 0.001887795282477199
+            "residual_kl_at_effective_order": 0.001887795282477199,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0008981046494214604
           },
           "quantisation": {
             "by_clusters": [
@@ -303,7 +570,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.001069463354271611
+            "residual_kl_at_effective_order": 0.001069463354271611,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.001069463354271611
           },
           "quantisation": {
             "by_clusters": [
@@ -387,7 +656,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.0013424388221634997
+            "residual_kl_at_effective_order": 0.0013424388221634997,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0013424388221634997
           },
           "quantisation": {
             "by_clusters": [
@@ -471,7 +742,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.0015327212510689693
+            "residual_kl_at_effective_order": 0.0015327212510689693,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0015327212510689693
           },
           "quantisation": {
             "by_clusters": [
@@ -555,7 +828,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.0025647821248744435
+            "residual_kl_at_effective_order": 0.0025647821248744435,
+            "explained_by_finite_context": false,
+            "residual_kl_at_max_order": 0.0025647821248744435
           },
           "quantisation": {
             "by_clusters": [
@@ -607,13 +882,21 @@
       ],
       "capacity_threshold_d_model": 4,
       "fallback": {
-        "verdict": "no single fallback dominates",
+        "verdict": "collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0204 nats below threshold vs 0.0651 above); none of the three: below threshold the model's own predictions are not reproduced by a table of any tested order (residual 0.0069 nats at order 5, vs 0.0011 above), so the degradation is not a finite-memory truncation, a quantisation, or a low-rank projection -- it is unstructured error",
+        "fraction_explained_by_finite_context_below": 0.3333333333333333,
+        "fraction_explained_by_finite_context_above": 0.8571428571428571,
+        "median_max_order_residual_kl_below": 0.006865893488806218,
+        "median_max_order_residual_kl_above": 0.001069463354271611,
+        "median_bigram_residual_kl_below": 0.020426465162930806,
+        "median_bigram_residual_kl_above": 0.06509220030270862,
+        "median_trigram_residual_kl_below": 0.014126019786089957,
+        "median_trigram_residual_kl_above": 0.021105731675416444,
         "median_effective_order_below": 5.0,
         "median_effective_order_above": 5.0,
         "median_clusters_below": 6.0,
         "median_clusters_above": 6.0,
-        "median_effective_rank_below": 1.9988321332788523,
-        "median_effective_rank_above": 1.9999700082954723
+        "median_effective_rank_below": 1.9923722716259358,
+        "median_effective_rank_above": 1.999964231349369
       }
     },
     {
@@ -621,6 +904,178 @@
       "oracle_loss": 0.485222727060318,
       "criterion_nats": 0.02,
       "points": [
+        {
+          "d_model": 2,
+          "n_params": 356,
+          "gap": 0.026410987600684166,
+          "gap_stderr": 0.0006317158695310354,
+          "kl_to_optimal": 0.026457026600837708,
+          "probe_r2": 0.8187468464277907,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.051835864782333374
+              },
+              {
+                "order": 1,
+                "residual_kl": -2.2799080515006812e-08
+              },
+              {
+                "order": 2,
+                "residual_kl": -2.2799080606254065e-08
+              },
+              {
+                "order": 3,
+                "residual_kl": -2.2799080691620636e-08
+              },
+              {
+                "order": 4,
+                "residual_kl": -2.2799081123760084e-08
+              },
+              {
+                "order": 5,
+                "residual_kl": -2.279908246783381e-08
+              }
+            ],
+            "effective_order": 1,
+            "residual_kl_at_effective_order": -2.2799080515006812e-08,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": -2.279908246783381e-08
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.9999998807907104
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.9999998807907104
+              }
+            ],
+            "clusters_for_95pct": 2
+          },
+          "effective_rank": 1.0
+        },
+        {
+          "d_model": 3,
+          "n_params": 605,
+          "gap": 0.02563066966831684,
+          "gap_stderr": 0.0006822029245086014,
+          "kl_to_optimal": 0.025287175551056862,
+          "probe_r2": 0.8269948746147671,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.053509704768657684
+              },
+              {
+                "order": 1,
+                "residual_kl": 0.001171922434331633
+              },
+              {
+                "order": 2,
+                "residual_kl": 0.0010608464627147244
+              },
+              {
+                "order": 3,
+                "residual_kl": 0.0009767180339752667
+              },
+              {
+                "order": 4,
+                "residual_kl": 0.0009117975470593634
+              },
+              {
+                "order": 5,
+                "residual_kl": 0.0008598566170628132
+              }
+            ],
+            "effective_order": 1,
+            "residual_kl_at_effective_order": 0.001171922434331633,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0008598566170628132
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.9849939346313477
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.9928430318832397
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.9956403374671936
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9975719451904297
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.9986304044723511
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.9992045760154724
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.9995126724243164
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.9997221827507019
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.9998250603675842
+              }
+            ],
+            "clusters_for_95pct": 2
+          },
+          "effective_rank": 1.0000000000000406
+        },
         {
           "d_model": 4,
           "n_params": 902,
@@ -656,7 +1111,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.0031589776927644433
+            "residual_kl_at_effective_order": 0.0031589776927644433,
+            "explained_by_finite_context": false,
+            "residual_kl_at_max_order": 0.0031589776927644433
           },
           "quantisation": {
             "by_clusters": [
@@ -706,6 +1163,92 @@
           "effective_rank": 1.0000000000000446
         },
         {
+          "d_model": 6,
+          "n_params": 1640,
+          "gap": 0.004176259506493807,
+          "gap_stderr": 0.00038705641054548323,
+          "kl_to_optimal": 0.00413919985294342,
+          "probe_r2": 0.8792453939902694,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.07212181389331818
+              },
+              {
+                "order": 1,
+                "residual_kl": 0.023050462996750388
+              },
+              {
+                "order": 2,
+                "residual_kl": 0.0019049621814792555
+              },
+              {
+                "order": 3,
+                "residual_kl": 0.0018649697756662382
+              },
+              {
+                "order": 4,
+                "residual_kl": 0.0018213370351039212
+              },
+              {
+                "order": 5,
+                "residual_kl": 0.0018094921917671894
+              }
+            ],
+            "effective_order": 2,
+            "residual_kl_at_effective_order": 0.0019049621814792555,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0018094921917671894
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.8168773055076599
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.985095202922821
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.9918206334114075
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9956251382827759
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.9969661831855774
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.9982165098190308
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.9986918568611145
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.9993836283683777
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.9996148943901062
+              }
+            ],
+            "clusters_for_95pct": 3
+          },
+          "effective_rank": 1.0000000000000384
+        },
+        {
           "d_model": 8,
           "n_params": 2570,
           "gap": 0.0006315810605883598,
@@ -740,7 +1283,9 @@
               }
             ],
             "effective_order": 2,
-            "residual_kl_at_effective_order": 0.0014349647915815314
+            "residual_kl_at_effective_order": 0.0014349647915815314,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.00035834086912038993
           },
           "quantisation": {
             "by_clusters": [
@@ -824,7 +1369,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.003607522615900906
+            "residual_kl_at_effective_order": 0.003607522615900906,
+            "explained_by_finite_context": false,
+            "residual_kl_at_max_order": 0.003607522615900906
           },
           "quantisation": {
             "by_clusters": [
@@ -908,7 +1455,9 @@
               }
             ],
             "effective_order": 2,
-            "residual_kl_at_effective_order": 0.0012439737510406396
+            "residual_kl_at_effective_order": 0.0012439737510406396,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.00036840773499239676
           },
           "quantisation": {
             "by_clusters": [
@@ -992,7 +1541,9 @@
               }
             ],
             "effective_order": 2,
-            "residual_kl_at_effective_order": 0.0013575712384086168
+            "residual_kl_at_effective_order": 0.0013575712384086168,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0004753896097285993
           },
           "quantisation": {
             "by_clusters": [
@@ -1076,7 +1627,9 @@
               }
             ],
             "effective_order": 2,
-            "residual_kl_at_effective_order": 0.0016490040345037821
+            "residual_kl_at_effective_order": 0.0016490040345037821,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0006572277352150106
           },
           "quantisation": {
             "by_clusters": [
@@ -1160,7 +1713,9 @@
               }
             ],
             "effective_order": 3,
-            "residual_kl_at_effective_order": 0.0016919233347975956
+            "residual_kl_at_effective_order": 0.0016919233347975956,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0016442216426321577
           },
           "quantisation": {
             "by_clusters": [
@@ -1212,13 +1767,21 @@
       ],
       "capacity_threshold_d_model": 4,
       "fallback": {
-        "verdict": "no single fallback dominates",
-        "median_effective_order_below": 5.0,
+        "verdict": "finite-memory truncation (effective Markov order 1 below threshold vs 2 above); belief quantisation (2 clusters explain 95% below threshold vs 3 above); collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0012 nats below threshold vs 0.0263 above)",
+        "fraction_explained_by_finite_context_below": 0.6666666666666666,
+        "fraction_explained_by_finite_context_above": 0.8571428571428571,
+        "median_max_order_residual_kl_below": 0.0008598566170628132,
+        "median_max_order_residual_kl_above": 0.0006572277352150106,
+        "median_bigram_residual_kl_below": 0.001171922434331633,
+        "median_bigram_residual_kl_above": 0.026345365855304885,
+        "median_trigram_residual_kl_below": 0.0010608464627147244,
+        "median_trigram_residual_kl_above": 0.0016490040345037821,
+        "median_effective_order_below": 1.0,
         "median_effective_order_above": 2.0,
-        "median_clusters_below": 3.0,
+        "median_clusters_below": 2.0,
         "median_clusters_above": 3.0,
-        "median_effective_rank_below": 1.0000000000000446,
-        "median_effective_rank_above": 1.0000000000000333
+        "median_effective_rank_below": 1.0000000000000406,
+        "median_effective_rank_above": 1.0000000000000357
       }
     },
     {
@@ -1226,6 +1789,178 @@
       "oracle_loss": 1.092545509338379,
       "criterion_nats": 0.02,
       "points": [
+        {
+          "d_model": 2,
+          "n_params": 435,
+          "gap": 0.0026462306268513203,
+          "gap_stderr": 0.000393314054235816,
+          "kl_to_optimal": 0.002816260326653719,
+          "probe_r2": 0.23791121121865877,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 1.5703218991802714e-07
+              },
+              {
+                "order": 1,
+                "residual_kl": 8.046435547233788e-09
+              },
+              {
+                "order": 2,
+                "residual_kl": 8.046422843462338e-09
+              },
+              {
+                "order": 3,
+                "residual_kl": 8.04639786567883e-09
+              },
+              {
+                "order": 4,
+                "residual_kl": 8.046267424130391e-09
+              },
+              {
+                "order": 5,
+                "residual_kl": 8.045987557650003e-09
+              }
+            ],
+            "effective_order": 0,
+            "residual_kl_at_effective_order": 1.5703218991802714e-07,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 8.045987557650003e-09
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.036015868186950684
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.036015868186950684
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.036015868186950684
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.56029212474823
+              }
+            ],
+            "clusters_for_95pct": null
+          },
+          "effective_rank": 1.0000351561845768
+        },
+        {
+          "d_model": 3,
+          "n_params": 759,
+          "gap": 0.0008394912001676857,
+          "gap_stderr": 0.0001861379132606089,
+          "kl_to_optimal": 0.0007380146416835487,
+          "probe_r2": 0.745329314457875,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.002285440918058157
+              },
+              {
+                "order": 1,
+                "residual_kl": 8.996436876487247e-05
+              },
+              {
+                "order": 2,
+                "residual_kl": 8.950601069891373e-05
+              },
+              {
+                "order": 3,
+                "residual_kl": 8.904233976621133e-05
+              },
+              {
+                "order": 4,
+                "residual_kl": 8.873475392265496e-05
+              },
+              {
+                "order": 5,
+                "residual_kl": 8.797046783451908e-05
+              }
+            ],
+            "effective_order": 1,
+            "residual_kl_at_effective_order": 8.996436876487247e-05,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 8.797046783451908e-05
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.8076505661010742
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.9610952138900757
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.8207438588142395
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9782291650772095
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.9794043898582458
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.9926757216453552
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.9942922592163086
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.9983693957328796
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.998862624168396
+              }
+            ],
+            "clusters_for_95pct": 3
+          },
+          "effective_rank": 1.3379250047368936
+        },
         {
           "d_model": 4,
           "n_params": 1155,
@@ -1261,7 +1996,9 @@
               }
             ],
             "effective_order": 1,
-            "residual_kl_at_effective_order": 0.00013110474928667944
+            "residual_kl_at_effective_order": 0.00013110474928667944,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.00011646146199136684
           },
           "quantisation": {
             "by_clusters": [
@@ -1311,6 +2048,92 @@
           "effective_rank": 1.3686449391903066
         },
         {
+          "d_model": 6,
+          "n_params": 2163,
+          "gap": 0.0006270345184020698,
+          "gap_stderr": 0.0001903463708003983,
+          "kl_to_optimal": 0.0007481260108761489,
+          "probe_r2": 0.7366816579198109,
+          "markov": {
+            "by_order": [
+              {
+                "order": 0,
+                "residual_kl": 0.002430216409265995
+              },
+              {
+                "order": 1,
+                "residual_kl": 0.00026539643191887034
+              },
+              {
+                "order": 2,
+                "residual_kl": 0.0002494502703560864
+              },
+              {
+                "order": 3,
+                "residual_kl": 0.000238793855726014
+              },
+              {
+                "order": 4,
+                "residual_kl": 0.00022997746102680532
+              },
+              {
+                "order": 5,
+                "residual_kl": 0.0002226738670212213
+              }
+            ],
+            "effective_order": 1,
+            "residual_kl_at_effective_order": 0.00026539643191887034,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0002226738670212213
+          },
+          "quantisation": {
+            "by_clusters": [
+              {
+                "clusters": 1,
+                "variance_explained": 0.0
+              },
+              {
+                "clusters": 2,
+                "variance_explained": 0.752168595790863
+              },
+              {
+                "clusters": 3,
+                "variance_explained": 0.8892274498939514
+              },
+              {
+                "clusters": 4,
+                "variance_explained": 0.8111766576766968
+              },
+              {
+                "clusters": 6,
+                "variance_explained": 0.9470545053482056
+              },
+              {
+                "clusters": 8,
+                "variance_explained": 0.9510831832885742
+              },
+              {
+                "clusters": 12,
+                "variance_explained": 0.9757565855979919
+              },
+              {
+                "clusters": 16,
+                "variance_explained": 0.9791187047958374
+              },
+              {
+                "clusters": 24,
+                "variance_explained": 0.9865351915359497
+              },
+              {
+                "clusters": 32,
+                "variance_explained": 0.9898940920829773
+              }
+            ],
+            "clusters_for_95pct": 8
+          },
+          "effective_rank": 1.4270201174578578
+        },
+        {
           "d_model": 8,
           "n_params": 3459,
           "gap": 0.0010234606452286243,
@@ -1345,7 +2168,9 @@
               }
             ],
             "effective_order": 1,
-            "residual_kl_at_effective_order": 0.00028825125771634653
+            "residual_kl_at_effective_order": 0.00028825125771634653,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0002648089816453716
           },
           "quantisation": {
             "by_clusters": [
@@ -1429,7 +2254,9 @@
               }
             ],
             "effective_order": 1,
-            "residual_kl_at_effective_order": 0.0003519504916912174
+            "residual_kl_at_effective_order": 0.0003519504916912174,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.00031702621756516823
           },
           "quantisation": {
             "by_clusters": [
@@ -1513,7 +2340,9 @@
               }
             ],
             "effective_order": 1,
-            "residual_kl_at_effective_order": 0.0004913587541816822
+            "residual_kl_at_effective_order": 0.0004913587541816822,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.00043843617745795046
           },
           "quantisation": {
             "by_clusters": [
@@ -1597,7 +2426,9 @@
               }
             ],
             "effective_order": 1,
-            "residual_kl_at_effective_order": 0.0009737104105334577
+            "residual_kl_at_effective_order": 0.0009737104105334577,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0009122539520535851
           },
           "quantisation": {
             "by_clusters": [
@@ -1681,7 +2512,9 @@
               }
             ],
             "effective_order": 1,
-            "residual_kl_at_effective_order": 0.0019978653900548753
+            "residual_kl_at_effective_order": 0.0019978653900548753,
+            "explained_by_finite_context": true,
+            "residual_kl_at_max_order": 0.0019231490733484617
           },
           "quantisation": {
             "by_clusters": [
@@ -1765,7 +2598,9 @@
               }
             ],
             "effective_order": 5,
-            "residual_kl_at_effective_order": 0.004446535360303582
+            "residual_kl_at_effective_order": 0.004446535360303582,
+            "explained_by_finite_context": false,
+            "residual_kl_at_max_order": 0.004446535360303582
           },
           "quantisation": {
             "by_clusters": [
@@ -1822,7 +2657,7 @@
     }
   ],
   "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp06_capacity.png",
-  "wall_time_s": 1045.708424091339,
+  "wall_time_s": 587.8088908195496,
   "environment": {
     "python": "3.14.0",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -1830,31 +2665,47 @@
     "numpy": "2.2.6",
     "cuda_available": true,
     "device_name": "NVIDIA GeForce RTX 4080 Laptop GPU",
-    "git_commit": "3d8fbb5"
+    "git_commit": "fd2522b"
   },
   "summary": {
     "mess3_hard": {
       "capacity_threshold_d_model": 4,
       "fallback": {
-        "verdict": "no single fallback dominates",
+        "verdict": "collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0204 nats below threshold vs 0.0651 above); none of the three: below threshold the model's own predictions are not reproduced by a table of any tested order (residual 0.0069 nats at order 5, vs 0.0011 above), so the degradation is not a finite-memory truncation, a quantisation, or a low-rank projection -- it is unstructured error",
+        "fraction_explained_by_finite_context_below": 0.3333333333333333,
+        "fraction_explained_by_finite_context_above": 0.8571428571428571,
+        "median_max_order_residual_kl_below": 0.006865893488806218,
+        "median_max_order_residual_kl_above": 0.001069463354271611,
+        "median_bigram_residual_kl_below": 0.020426465162930806,
+        "median_bigram_residual_kl_above": 0.06509220030270862,
+        "median_trigram_residual_kl_below": 0.014126019786089957,
+        "median_trigram_residual_kl_above": 0.021105731675416444,
         "median_effective_order_below": 5.0,
         "median_effective_order_above": 5.0,
         "median_clusters_below": 6.0,
         "median_clusters_above": 6.0,
-        "median_effective_rank_below": 1.9988321332788523,
-        "median_effective_rank_above": 1.9999700082954723
+        "median_effective_rank_below": 1.9923722716259358,
+        "median_effective_rank_above": 1.999964231349369
       }
     },
     "sns": {
       "capacity_threshold_d_model": 4,
       "fallback": {
-        "verdict": "no single fallback dominates",
-        "median_effective_order_below": 5.0,
+        "verdict": "finite-memory truncation (effective Markov order 1 below threshold vs 2 above); belief quantisation (2 clusters explain 95% below threshold vs 3 above); collapse toward a short-context table (a bigram explains the model's own predictions to within 0.0012 nats below threshold vs 0.0263 above)",
+        "fraction_explained_by_finite_context_below": 0.6666666666666666,
+        "fraction_explained_by_finite_context_above": 0.8571428571428571,
+        "median_max_order_residual_kl_below": 0.0008598566170628132,
+        "median_max_order_residual_kl_above": 0.0006572277352150106,
+        "median_bigram_residual_kl_below": 0.001171922434331633,
+        "median_bigram_residual_kl_above": 0.026345365855304885,
+        "median_trigram_residual_kl_below": 0.0010608464627147244,
+        "median_trigram_residual_kl_above": 0.0016490040345037821,
+        "median_effective_order_below": 1.0,
         "median_effective_order_above": 2.0,
-        "median_clusters_below": 3.0,
+        "median_clusters_below": 2.0,
         "median_clusters_above": 3.0,
-        "median_effective_rank_below": 1.0000000000000446,
-        "median_effective_rank_above": 1.0000000000000333
+        "median_effective_rank_below": 1.0000000000000406,
+        "median_effective_rank_above": 1.0000000000000357
       }
     },
     "random_non": {

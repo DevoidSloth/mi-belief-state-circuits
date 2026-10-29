@@ -161,6 +161,7 @@ def summarise(rows: list[dict]) -> dict:
             "variance_explained": best["metrics"]["variance_explained"],
             "loss_recovered": best["metrics"]["loss_recovered"],
             "dead_fraction": best["metrics"]["dead_fraction"],
+            "ablation_effect": best["metrics"]["ablation_effect"],
             "d_sae": best["metrics"]["d_sae"],
             "k": k,
             "sae_r2_at_k": c["sae_r2"],
