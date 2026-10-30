@@ -132,6 +132,18 @@ Environment: NVIDIA GeForce RTX 4080 Laptop GPU, torch 2.9.1+cu126, python 3.14.
 - Belief capture falls as the dictionary is forced to be sparser on 3/5 processes, while PCA — which has no sparsity knob — is a constant. That is the finding the analytic ground truth makes available: the loss is not a defect in these autoencoders (variance explained stays above 0.9 and downstream loss recovered stays near 1.0 throughout), it is the **sparsity prior itself** paying a price on a variable that is known to be dense. A belief state is a point on a simplex: continuous, and with every coordinate non-zero almost always — exactly what a sparse basis is built not to represent.
 - The cost tracks how much belief structure there is *to* lose, not the nominal belief dimension. It is largest on `mess3` and `mess3_hard`, where the model represents the posterior well and it is genuinely two-dimensional. It is near zero on `sns`, whose belief is effectively one-dimensional so a single feature carries it, and on `random_non`, where the model's own representation is poor to begin with (the best k-dimensional subspace only reaches 0.773) and a sparse basis therefore gives up little.
 
+**How many sparse features buy two linear directions?** For the three-state processes the belief simplex is two-dimensional, so a *two*-dimensional linear subspace should nearly saturate it — and it does. The question is what a sparse basis charges for the same thing:
+
+| process | R² from the best 2-dim subspace | SAE features needed to match | cost ratio |
+|---|---|---|---|
+| mess3_hard | 0.981 | >32 | >16× |
+| mess3 | 0.907 | >32 | >16× |
+| sns | 0.989 | 4 | 2× |
+| random_non | 0.773 | 4 | 2× |
+| regimevol | 0.976 | 32 | 16× |
+
+That ratio is the cleanest statement of the result. The object being represented is two continuous numbers; a sparse dictionary needs an order of magnitude more directions to say the same thing, because it is built to represent things that are mostly off, and a posterior never is.
+
 
 ## 6. What replaces exact inference when capacity runs out
 

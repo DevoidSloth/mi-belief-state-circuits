@@ -27,6 +27,24 @@ pytest                 # 105 tests, mostly ground-truth checks
 Measured results live in [`results/RESULTS.md`](results/RESULTS.md), rebuilt from
 the JSON the experiments write. Nothing in that file is typed by hand.
 
+**What came out.** Across 15 processes the models land a median **0.0025
+nats/token** above the analytic optimum, 14 of 15 within 0.01. The belief state
+is linearly decodable at **R² ≈ 0.98**, and steering along that direction moves
+the output toward the belief it encodes with a margin of **0.52** over a
+norm-matched random control — but R² and causal use *anti-correlate across
+layers* on 6 of 10 processes, so the probe alone would have been misleading. On
+the linear-Gaussian task the model's impulse response matches the analytic
+Kalman gain at **cosine 0.9999** with the decay rate within **0.6%**, on 10 of
+10 seeds. Trained on a *family* of processes it infers which one it is in from
+context, agreeing with the Bayes-optimal component posterior **98–99.8%** of the
+time. Three results cut against the grain and are reported as they came out: a
+GRU beats the transformer on 6 of 15 processes (**137×** on `rrxor`); no sparse
+circuit exists at all for `rrxor`, and different seeds find genuinely different
+circuits elsewhere (overlap 0.51–1.00); and a sparse autoencoder needs
+**more than 16× as many features as linear directions** to encode the same
+posterior — two continuous numbers that a 2-D subspace captures at R² 0.98 cost
+the SAE more than 32 features to match.
+
 ---
 
 ## What is actually verified
@@ -153,9 +171,11 @@ network, because scrubbing everything drives these models off-distribution to a
 loss *worse than the marginal*, which inflates any percentage computed against
 it. The conventional number is reported alongside and is always larger.
 
-## Two things that were wrong on the first attempt
+## What was wrong on the way here
 
-Both were found by tests, and both would have produced confident nonsense:
+Each of these produced a confident, plausible, wrong number before it was
+caught. They are listed because the ratio matters: an interpretability result is
+mostly the debugging that preceded it.
 
 **Contrast pairs matched the token being predicted.** Pairing sequences by their
 last *k* observations *including* position *t* conditions every pair on its own
@@ -167,13 +187,45 @@ flipped the top effect from −0.04 to **+1.89 nats**.
 **Attribution patching used the gradient of a mean loss**, scaling every
 attribution down by the batch size and making a working method look broken.
 
+**The causal margin divided by a per-pair KL.** Averaging per-pair ratios lets a
+pair whose KL-to-target is ~1e-9 dominate the mean: `rrxor` reported a steering
+margin of **+2891**. Fractions now come from aggregate KL, pairs the model
+already predicts are excluded, and the error is bootstrapped. A second version
+of the same bug appeared when the *control* direction was catastrophic rather
+than the baseline, giving Kalman a margin of **+26681**; the control is now
+floored at zero, because a perturbation that makes things worse explains none of
+the effect.
+
+**The Kalman decay rate was fitted through the noise floor.** An exponential
+kernel reaches the numerical noise of the autograd estimate within ~20 lags, and
+including those points biased the rate by 2–7% while leaving the fit's R²
+looking healthy. On a synthetic kernel the trimmed fit recovers 0.5315 against a
+true 0.5314; the untrimmed one gives 0.5187.
+
+**SAE dead-feature resampling destabilised every run.** Traced by instrumenting
+each resample: reintroducing ~135 features at once took variance explained from
+0.998 to **−106 in a single step**, because new encoder columns were written at
+unit norm with a zero bias and so fired on half the dataset at full magnitude.
+Scaling them to the surviving features' norm and resetting the stale Adam state
+both help; neither fixes it. Resampling is a training convenience, not part of
+any claim, so it is off by default and the cost is reported instead.
+
+**The seed-robustness metric was tautological.** "Do all seeds contain the
+components common to all seeds" is true by construction, and it dutifully
+reported 5/5 everywhere. Leave-one-out plus pairwise Jaccard shows the real
+picture: **2/5 to 5/5, overlap 0.51–1.00**.
+
+**`.gitignore` had CRLF line endings**, so git treated the trailing carriage
+return as part of every pattern and none of them matched.
+
 And one thing that was not a bug but a wrong expectation: reading a head's
 belief-to-belief transport `vᵀ(W_V W_O)u` finds *nothing* on the Kalman task,
 even in models whose filter matches the analytic one to four decimal places. A
 transformer has no state to carry between positions, so it cannot implement the
 recursion `m_{t+1} = αm_t + aKy_t`; it implements the unrolled convolution
 `m_t = aK Σ_d α^d y_{t−1−d}`. The object that matches the analytic gain is the
-model's **impulse response** `∂m̂_t/∂y_{t−1−d}`, measured by autograd.
+model's **impulse response** `∂m̂_t/∂y_{t−1−d}`, measured by autograd — and it
+matches at **cosine 0.9999**.
 
 ## Layout
 

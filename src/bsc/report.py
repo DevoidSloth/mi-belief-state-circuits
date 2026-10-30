@@ -383,6 +383,7 @@ def _sae_sparsity_note(d) -> str:
     if not rows:
         return ""
     costly = [r for r in rows if float(r[6]) < -0.02]
+    efficiency = _sae_efficiency_note(d)
     table = _table(
         ["process", "belief dim", "L0 (densest)", "SAE R² there", "L0 (sparsest)",
          "SAE R² there", "cost of sparsity", "PCA R² (no sparsity knob)"],
@@ -406,7 +407,45 @@ def _sae_sparsity_note(d) -> str:
         "belief is effectively one-dimensional so a single feature carries it, and on "
         "`random_non`, where the model's own representation is poor to begin with (the best "
         "k-dimensional subspace only reaches 0.773) and a sparse basis therefore gives up "
-        "little.\n"
+        "little.\n" + efficiency
+    )
+
+
+def _sae_efficiency_note(d) -> str:
+    """How many sparse features it takes to match two linear directions."""
+    rows = []
+    for row in d["rows"]:
+        cap = row["best"]["capture"]["rows"]
+        by_k = {c["k"]: c for c in cap}
+        if 2 not in by_k:
+            continue
+        target = by_k[2]["rrr_r2"]
+        need = next((c["k"] for c in sorted(cap, key=lambda c: c["k"])
+                     if c["sae_r2"] >= target - 0.01), None)
+        rows.append(
+            [
+                row["process"],
+                _fmt(target, 3),
+                str(need) if need is not None else f">{max(by_k)}",
+                f"{need // 2}×" if need else f">{max(by_k) // 2}×",
+            ]
+        )
+    if not rows:
+        return ""
+    return (
+        "\n**How many sparse features buy two linear directions?** For the three-state processes "
+        "the belief simplex is two-dimensional, so a *two*-dimensional linear subspace should "
+        "nearly saturate it — and it does. The question is what a sparse basis charges for the "
+        "same thing:\n\n"
+        + _table(
+            ["process", "R² from the best 2-dim subspace", "SAE features needed to match",
+             "cost ratio"],
+            rows,
+        )
+        + "\n\nThat ratio is the cleanest statement of the result. The object being represented "
+        "is two continuous numbers; a sparse dictionary needs an order of magnitude more "
+        "directions to say the same thing, because it is built to represent things that are "
+        "mostly off, and a posterior never is.\n"
     )
 
 
