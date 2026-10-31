@@ -1088,7 +1088,7 @@
           0.12695255313505172
         ]
       },
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_mess3.png"
+      "figure": "results/figures/exp02_geometry_mess3.png"
     },
     {
       "process": "mess3_hard",
@@ -2176,7 +2176,7 @@
           0.410924801415873
         ]
       },
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_mess3_hard.png"
+      "figure": "results/figures/exp02_geometry_mess3_hard.png"
     },
     {
       "process": "even",
@@ -2725,7 +2725,7 @@
       "causal_margin_at_best_r2_hook": 0.060233891010284424,
       "r2_vs_margin_pearson": -0.9728449765652346,
       "r2_vs_margin_spearman": -0.6571428571428573,
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_even.png"
+      "figure": "results/figures/exp02_geometry_even.png"
     },
     {
       "process": "rrxor",
@@ -3365,7 +3365,7 @@
           0.30173179584487153
         ]
       },
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_rrxor.png"
+      "figure": "results/figures/exp02_geometry_rrxor.png"
     },
     {
       "process": "sns",
@@ -3914,7 +3914,7 @@
       "causal_margin_at_best_r2_hook": 0.2721405625343323,
       "r2_vs_margin_pearson": 0.23919721964201696,
       "r2_vs_margin_spearman": 0.942857142857143,
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_sns.png"
+      "figure": "results/figures/exp02_geometry_sns.png"
     },
     {
       "process": "drifting_coin",
@@ -4691,7 +4691,7 @@
       "causal_margin_at_best_r2_hook": 0.049432992935180664,
       "r2_vs_margin_pearson": -0.08091300528501692,
       "r2_vs_margin_spearman": 0.06666666666666667,
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_drifting_coin.png"
+      "figure": "results/figures/exp02_geometry_drifting_coin.png"
     },
     {
       "process": "random_non",
@@ -5558,7 +5558,7 @@
           0.12055689844805016
         ]
       },
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_random_non.png"
+      "figure": "results/figures/exp02_geometry_random_non.png"
     },
     {
       "process": "kalman",
@@ -5875,7 +5875,7 @@
       "causal_margin_at_best_r2_hook": 0.9876890778541565,
       "r2_vs_margin_pearson": 0.9994435555041569,
       "r2_vs_margin_spearman": 1.0,
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_kalman.png"
+      "figure": "results/figures/exp02_geometry_kalman.png"
     },
     {
       "process": "garch",
@@ -6642,7 +6642,7 @@
       "causal_margin_at_best_r2_hook": 0.5896862149238586,
       "r2_vs_margin_pearson": 0.9251635830745999,
       "r2_vs_margin_spearman": 0.9,
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_garch.png"
+      "figure": "results/figures/exp02_geometry_garch.png"
     },
     {
       "process": "regimevol",
@@ -7499,7 +7499,7 @@
           0.19301004702439833
         ]
       },
-      "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp02_geometry_regimevol.png"
+      "figure": "results/figures/exp02_geometry_regimevol.png"
     }
   ],
   "wall_time_s": 115.06499934196472,

@@ -2918,7 +2918,7 @@
       ]
     }
   ],
-  "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp05_sae_capture.png",
+  "figure": "results/figures/exp05_sae_capture.png",
   "wall_time_s": 610.7404832839966,
   "environment": {
     "python": "3.14.0",

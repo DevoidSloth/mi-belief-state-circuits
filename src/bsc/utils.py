@@ -57,7 +57,12 @@ def to_jsonable(obj: Any) -> Any:
     if isinstance(obj, torch.Tensor):
         return obj.detach().cpu().tolist()
     if isinstance(obj, Path):
-        return str(obj)
+        # Relative to the repo root: absolute paths leak the local directory
+        # layout (and the developer's username) into committed result files.
+        try:
+            return str(obj.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
+        except ValueError:
+            return str(obj)
     if isinstance(obj, float | int | str | bool) or obj is None:
         return obj
     return repr(obj)

@@ -1491,7 +1491,7 @@
       "in_context_gain_oracle": 0.03309434652328491
     }
   ],
-  "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp07_incontext.png",
+  "figure": "results/figures/exp07_incontext.png",
   "wall_time_s": 13.937130212783813,
   "environment": {
     "python": "3.14.0",

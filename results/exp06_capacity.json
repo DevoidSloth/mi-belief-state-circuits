@@ -2656,7 +2656,7 @@
       }
     }
   ],
-  "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp06_capacity.png",
+  "figure": "results/figures/exp06_capacity.png",
   "wall_time_s": 83.45274043083191,
   "environment": {
     "python": "3.14.0",

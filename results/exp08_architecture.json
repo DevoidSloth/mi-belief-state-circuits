@@ -1275,7 +1275,7 @@
       "tracks_context_gain": 11.10266271281972
     }
   ],
-  "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp08_architecture.png",
+  "figure": "results/figures/exp08_architecture.png",
   "wall_time_s": 2.7753114700317383,
   "environment": {
     "python": "3.14.0",

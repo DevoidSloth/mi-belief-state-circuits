@@ -1011,7 +1011,7 @@
       }
     }
   ],
-  "figure": "C:\\Users\\jason\\Dev\\Projects\\mi-belief-state-circuits\\results\\figures\\exp04_kalman_kernel.png",
+  "figure": "results/figures/exp04_kalman_kernel.png",
   "wall_time_s": 5.536642789840698,
   "environment": {
     "python": "3.14.0",
